@@ -1,0 +1,155 @@
+{
+  "name": "openshift-cluster-management",
+  "version": "1.0.0",
+  "description": "Example MCP schema for OpenShift cluster management operations. Used as test input for the generic mock MCP server POC.",
+  "tools": [
+    {
+      "name": "list_clusters",
+      "description": "List all OpenShift clusters for the current user. Returns a summary of each cluster including name, ID, version, and status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "clusters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cluster_id": {"type": "string", "description": "Unique cluster identifier (UUID)"},
+                "name": {"type": "string", "description": "Human-readable cluster name"},
+                "openshift_version": {"type": "string", "description": "OpenShift version installed"},
+                "status": {"type": "string", "enum": ["preparing", "ready", "installing", "installed", "error", "cancelled"]}
+              }
+            }
+          },
+          "total": {"type": "integer", "description": "Total number of clusters"}
+        }
+      },
+      "outputExample": {
+        "clusters": [
+          {
+            "cluster_id": "aabb1122-3344-5566-7788-99aabbccddee",
+            "name": "prod-cluster",
+            "openshift_version": "4.18.2",
+            "status": "installed"
+          },
+          {
+            "cluster_id": "11223344-5566-7788-99aa-bbccddeeff00",
+            "name": "dev-cluster",
+            "openshift_version": "4.17.5",
+            "status": "ready"
+          }
+        ],
+        "total": 2
+      }
+    },
+    {
+      "name": "create_cluster",
+      "description": "Create a new OpenShift cluster definition. This creates the cluster configuration only; hosts must be added and install_cluster called to begin installation. For single-node (SNO) deployments, set single_node to true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name for the new cluster"},
+          "version": {"type": "string", "description": "OpenShift version to install (e.g. '4.18.2'). Use list_versions to see available versions."},
+          "base_domain": {"type": "string", "description": "Base DNS domain for the cluster (e.g. 'example.com')"},
+          "single_node": {"type": "boolean", "description": "True for single-node OpenShift (SNO), false for multi-node HA cluster"},
+          "platform": {
+            "type": "string",
+            "enum": ["baremetal", "vsphere", "none"],
+            "description": "Infrastructure platform. SNO requires 'none'. Multi-node defaults to 'baremetal'."
+          }
+        },
+        "required": ["name", "version", "base_domain", "single_node"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_id": {"type": "string", "description": "UUID of the created cluster"},
+          "name": {"type": "string"},
+          "status": {"type": "string", "enum": ["preparing", "ready", "installing", "installed", "error"]},
+          "openshift_version": {"type": "string"},
+          "platform": {"type": "string"},
+          "high_availability_mode": {"type": "string", "enum": ["Full", "None"]}
+        }
+      },
+      "outputExample": {
+        "cluster_id": "ff001122-aabb-ccdd-eeff-001122334455",
+        "name": "my-new-cluster",
+        "status": "preparing",
+        "openshift_version": "4.18.2",
+        "platform": "baremetal",
+        "high_availability_mode": "Full"
+      }
+    },
+    {
+      "name": "get_cluster",
+      "description": "Get detailed information about a specific cluster including configuration, status, network settings, and host information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_id": {"type": "string", "description": "UUID of the cluster to retrieve"}
+        },
+        "required": ["cluster_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_id": {"type": "string"},
+          "name": {"type": "string"},
+          "status": {"type": "string", "enum": ["preparing", "ready", "installing", "installed", "error"]},
+          "openshift_version": {"type": "string"},
+          "platform": {"type": "string"},
+          "high_availability_mode": {"type": "string", "enum": ["Full", "None"]},
+          "base_dns_domain": {"type": "string"},
+          "api_vip": {"type": "string", "description": "API virtual IP address (empty if not set)"},
+          "ingress_vip": {"type": "string", "description": "Ingress virtual IP address (empty if not set)"},
+          "host_count": {"type": "integer", "description": "Number of discovered hosts"},
+          "ready_host_count": {"type": "integer", "description": "Number of hosts in ready state"}
+        }
+      },
+      "outputExample": {
+        "cluster_id": "ff001122-aabb-ccdd-eeff-001122334455",
+        "name": "my-new-cluster",
+        "status": "ready",
+        "openshift_version": "4.18.2",
+        "platform": "baremetal",
+        "high_availability_mode": "Full",
+        "base_dns_domain": "example.com",
+        "api_vip": "192.168.1.100",
+        "ingress_vip": "192.168.1.101",
+        "host_count": 3,
+        "ready_host_count": 3
+      }
+    },
+    {
+      "name": "install_cluster",
+      "description": "Start the OpenShift installation process for a prepared cluster. All hosts must be discovered and in 'ready' state, and all validations must pass before installation can begin. Returns immediately; use get_cluster to monitor progress.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_id": {"type": "string", "description": "UUID of the cluster to install"}
+        },
+        "required": ["cluster_id"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "cluster_id": {"type": "string"},
+          "name": {"type": "string"},
+          "status": {"type": "string", "enum": ["installing"]},
+          "installation_started_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "outputExample": {
+        "cluster_id": "ff001122-aabb-ccdd-eeff-001122334455",
+        "name": "my-new-cluster",
+        "status": "installing",
+        "installation_started_at": "2026-09-04T10:30:00Z"
+      }
+    }
+  ]
+}

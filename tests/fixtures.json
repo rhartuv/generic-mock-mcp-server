@@ -1,0 +1,60 @@
+{
+  "description": "Example fixtures for a 'create SNO cluster' skill flow. Responses are coherent across the multi-step sequence.",
+  "recorded_from": "openshift-cluster-management schema v1.0.0 (synthetic)",
+  "sequence": [
+    {
+      "tool": "list_clusters",
+      "input": {},
+      "output": {
+        "clusters": [
+          {
+            "cluster_id": "aabb1122-3344-5566-7788-99aabbccddee",
+            "name": "prod-cluster",
+            "openshift_version": "4.18.2",
+            "status": "installed"
+          }
+        ],
+        "total": 1
+      }
+    },
+    {
+      "tool": "create_cluster",
+      "input": {"name": "edge-sno", "version": "4.18.2", "base_domain": "lab.example.com", "single_node": true},
+      "output": {
+        "cluster_id": "cc001122-dead-beef-cafe-001122334455",
+        "name": "edge-sno",
+        "status": "preparing",
+        "openshift_version": "4.18.2",
+        "platform": "none",
+        "high_availability_mode": "None"
+      }
+    },
+    {
+      "tool": "get_cluster",
+      "input": {"cluster_id": "cc001122-dead-beef-cafe-001122334455"},
+      "output": {
+        "cluster_id": "cc001122-dead-beef-cafe-001122334455",
+        "name": "edge-sno",
+        "status": "ready",
+        "openshift_version": "4.18.2",
+        "platform": "none",
+        "high_availability_mode": "None",
+        "base_dns_domain": "lab.example.com",
+        "api_vip": "",
+        "ingress_vip": "",
+        "host_count": 1,
+        "ready_host_count": 1
+      }
+    },
+    {
+      "tool": "install_cluster",
+      "input": {"cluster_id": "cc001122-dead-beef-cafe-001122334455"},
+      "output": {
+        "cluster_id": "cc001122-dead-beef-cafe-001122334455",
+        "name": "edge-sno",
+        "status": "installing",
+        "installation_started_at": "2026-09-04T14:30:00Z"
+      }
+    }
+  ]
+}

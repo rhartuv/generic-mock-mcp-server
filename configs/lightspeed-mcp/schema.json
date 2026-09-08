@@ -1,0 +1,1632 @@
+{
+  "name": "red-hat-lightspeed-mcp-server",
+  "version": "1.0.0",
+  "description": "Mock schema for the Red Hat Lightspeed MCP server. Tool catalog matches the Compass manifest at redhat/red-hat-lightspeed-mcp-server.",
+  "tools": [
+    {
+      "name": "get_mcp_version",
+      "description": "Get the Lightspeed MCP server version. Used as a connectivity test.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "server": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "version": "1.4.2",
+        "server": "Red Hat Lightspeed MCP",
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_active_rules",
+      "description": "Get Active Advisor Recommendations for Account",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_hosts_details_for_rule",
+      "description": "Get Detailed System Information for Advisor Recommendation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_hosts_hitting_a_rule",
+      "description": "Get Systems Affected by Advisor Recommendation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_recommendations_stats",
+      "description": "Get Statistics of Recommendations Across Categories and Risks",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_rule_by_text_search",
+      "description": "Find Advisor Recommendations by Text Search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_rule_details",
+      "description": "Get Detailed Advisor Recommendation Information",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "advisor__get_rule_from_node_id",
+      "description": "Find Advisor Recommendations using Knowledge Base solution ID or article ID",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "content-sources__list_repositories",
+      "description": "List repositories with filtering and pagination options.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__blueprint_compose",
+      "description": "Compose an image from a blueprint UUID created with create_blueprint, get_blueprints.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__create_blueprint",
+      "description": "Create a custom Linux image blueprint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_blueprint_details",
+      "description": "Get blueprint details.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_blueprints",
+      "description": "Show user's image blueprints (saved image templates/configurations).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_compose_details",
+      "description": "Get detailed information about a specific image build.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_composes",
+      "description": "Get a list of all image builds (composes) with their UUIDs and basic status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_distributions",
+      "description": "Get the list of distributions available to build images with.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_openapi",
+      "description": "Get OpenAPI spec. Use this to get details e.g for a new blueprint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__get_org_id",
+      "description": "Get the organization ID for RHEL image registration/subscription.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "image-builder__update_blueprint",
+      "description": "Update a blueprint.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "inventory__find_host_by_name",
+      "description": "Find a host by its hostname/display name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "display_name": {
+            "type": "string",
+            "description": "Hostname or display name to search for."
+          }
+        },
+        "required": [
+          "display_name"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "fqdn": {
+                  "type": "string"
+                },
+                "os_version": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      },
+      "outputExample": {
+        "results": [
+          {
+            "id": "68ce32aa-57da-49b7-8ded-dc4ad54e520a",
+            "display_name": "prod-webserver-01.example.com",
+            "fqdn": "prod-webserver-01.example.com",
+            "os_version": "RHEL 9.4"
+          }
+        ],
+        "total": 1
+      }
+    },
+    {
+      "name": "inventory__get_host_details",
+      "description": "Get detailed information for specific hosts by their IDs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "System UUID."
+          }
+        },
+        "required": [
+          "host_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "fqdn": {
+            "type": "string"
+          },
+          "os_version": {
+            "type": "string"
+          },
+          "arch": {
+            "type": "string"
+          },
+          "last_check_in": {
+            "type": "string"
+          },
+          "installed_packages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "running_services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "subscription_status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "id": "68ce32aa-57da-49b7-8ded-dc4ad54e520a",
+        "display_name": "prod-webserver-01.example.com",
+        "fqdn": "prod-webserver-01.example.com",
+        "os_version": "RHEL 9.4",
+        "arch": "x86_64",
+        "last_check_in": "2026-09-07T08:30:00Z",
+        "installed_packages": [
+          "openssl-3.0.7-24.el9.x86_64",
+          "openssl-libs-3.0.7-24.el9.x86_64",
+          "kernel-5.14.0-427.el9.x86_64",
+          "httpd-2.4.57-8.el9.x86_64"
+        ],
+        "running_services": [
+          "httpd.service",
+          "sshd.service",
+          "insights-client.timer"
+        ],
+        "tags": [
+          {
+            "namespace": "insights-client",
+            "key": "env",
+            "value": "production"
+          },
+          {
+            "namespace": "insights-client",
+            "key": "team",
+            "value": "platform"
+          }
+        ],
+        "subscription_status": "valid"
+      }
+    },
+    {
+      "name": "inventory__get_host_system_profile",
+      "description": "Get detailed system profile information for specific hosts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "host_id": {
+            "type": "string",
+            "description": "System UUID."
+          }
+        },
+        "required": [
+          "host_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "system_profile": {
+            "type": "object",
+            "properties": {
+              "os_release": {
+                "type": "string"
+              },
+              "os_kernel_version": {
+                "type": "string"
+              },
+              "arch": {
+                "type": "string"
+              },
+              "number_of_cpus": {
+                "type": "integer"
+              },
+              "cores_per_socket": {
+                "type": "integer"
+              },
+              "system_memory_bytes": {
+                "type": "integer"
+              },
+              "infrastructure_type": {
+                "type": "string"
+              },
+              "cloud_provider": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "id": "68ce32aa-57da-49b7-8ded-dc4ad54e520a",
+        "system_profile": {
+          "os_release": "9.4",
+          "os_kernel_version": "5.14.0-427.el9.x86_64",
+          "arch": "x86_64",
+          "number_of_cpus": 4,
+          "cores_per_socket": 2,
+          "system_memory_bytes": 17179869184,
+          "infrastructure_type": "virtual",
+          "cloud_provider": "aws"
+        }
+      }
+    },
+    {
+      "name": "inventory__get_host_tags",
+      "description": "Get tags for specific hosts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "inventory__get_workspace",
+      "description": "Get details for one or more workspaces by ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "inventory__list_hosts",
+      "description": "List hosts with filtering and sorting options.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "per_page": {
+            "type": "integer",
+            "description": "Results per page (default 10). Use integer, NOT string."
+          },
+          "page": {
+            "type": "integer",
+            "description": "Page number."
+          },
+          "display_name": {
+            "type": "string",
+            "description": "Filter by display name. Pass empty string for no filter."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "fqdn": {
+                  "type": "string"
+                },
+                "os_version": {
+                  "type": "string"
+                },
+                "updated": {
+                  "type": "string"
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "per_page": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          }
+        }
+      },
+      "outputExample": {
+        "results": [
+          {
+            "id": "68ce32aa-57da-49b7-8ded-dc4ad54e520a",
+            "display_name": "prod-webserver-01.example.com",
+            "fqdn": "prod-webserver-01.example.com",
+            "os_version": "RHEL 9.4",
+            "updated": "2026-09-07T08:30:00Z",
+            "tags": [
+              {
+                "namespace": "insights-client",
+                "key": "env",
+                "value": "production"
+              }
+            ]
+          },
+          {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "display_name": "staging-db-02.example.com",
+            "fqdn": "staging-db-02.example.com",
+            "os_version": "RHEL 9.3",
+            "updated": "2026-09-07T06:00:00Z",
+            "tags": [
+              {
+                "namespace": "insights-client",
+                "key": "env",
+                "value": "staging"
+              }
+            ]
+          },
+          {
+            "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+            "display_name": "prod-api-03.example.com",
+            "fqdn": "prod-api-03.example.com",
+            "os_version": "RHEL 8.10",
+            "updated": "2026-09-06T22:00:00Z",
+            "tags": [
+              {
+                "namespace": "insights-client",
+                "key": "env",
+                "value": "production"
+              }
+            ]
+          }
+        ],
+        "total": 45,
+        "per_page": 10,
+        "page": 1
+      }
+    },
+    {
+      "name": "inventory__list_workspace_hosts",
+      "description": "List hosts that belong to a workspace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "inventory__list_workspaces",
+      "description": "List Inventory workspaces (console UI name for Inventory groups).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "inventory__load_inventory_dashboard",
+      "description": "Show, list, or display fleet inventory in an interactive dashboard.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Optional search query."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "dashboard_url": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "total_systems": {
+                "type": "integer"
+              },
+              "stale": {
+                "type": "integer"
+              },
+              "rhel_9": {
+                "type": "integer"
+              },
+              "rhel_8": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "dashboard_url": "https://console.redhat.com/insights/inventory",
+        "summary": {
+          "total_systems": 45,
+          "stale": 2,
+          "rhel_9": 30,
+          "rhel_8": 15
+        }
+      }
+    },
+    {
+      "name": "planning__get_appstreams_lifecycle",
+      "description": "Get Application Streams lifecycle information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "planning__get_relevant_appstreams",
+      "description": "Get Application Streams relevant to the requester's inventory (includes lifecycle/support dates).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "planning__get_relevant_rhel_lifecycle",
+      "description": "Returns RHEL lifecycle information for systems in the requester's inventory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "planning__get_relevant_upcoming",
+      "description": "List relevant upcoming package changes, deprecations, additions and enhancements to user's systems.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "planning__get_rhel_lifecycle",
+      "description": "Returns life cycle dates for all RHEL majors and minors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "planning__get_upcoming_changes",
+      "description": "List upcoming package changes, deprecations, additions and enhancements.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "rbac__get_all_access",
+      "description": "Get access information for all Red Hat insights applications.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "remediations__create_vuln_playbook",
+      "description": "Create remediation playbook for given CVEs on given systems to mitigate vulnerabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cve_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of CVE identifiers to remediate."
+          },
+          "system_uuid": {
+            "type": "string",
+            "description": "Target system UUID."
+          }
+        },
+        "required": [
+          "cve_ids",
+          "system_uuid"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "playbook": {
+            "type": "string",
+            "description": "Ansible playbook YAML content."
+          },
+          "cves_addressed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "packages_updated": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "playbook": "---\n- name: Remediate CVE-2026-31337 on prod-webserver-01.example.com\n  hosts: \"68ce32aa-57da-49b7-8ded-dc4ad54e520a\"\n  become: true\n  tasks:\n    - name: Update openssl packages\n      ansible.builtin.dnf:\n        name:\n          - openssl\n          - openssl-libs\n        state: latest\n        security: true\n      notify: restart_affected_services\n\n    - name: Verify update\n      ansible.builtin.command: rpm -q openssl\n      register: verify_result\n      changed_when: false\n\n  handlers:\n    - name: restart_affected_services\n      ansible.builtin.service:\n        name: httpd\n        state: restarted\n",
+        "cves_addressed": [
+          "CVE-2026-31337"
+        ],
+        "packages_updated": [
+          "openssl-3.0.7-25.el9.x86_64",
+          "openssl-libs-3.0.7-25.el9.x86_64"
+        ]
+      }
+    },
+    {
+      "name": "rhsm__get_activation_key",
+      "description": "Get a specific activation key by name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "rhsm__get_activation_keys",
+      "description": "Get the list of activation keys available to the authenticated user.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "vulnerability__explain_cves",
+      "description": "Explain why CVEs are affecting my environment.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "system_uuid": {
+            "type": "string",
+            "description": "System UUID from inventory."
+          },
+          "cve_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of CVE identifiers to explain."
+          }
+        },
+        "required": [
+          "system_uuid",
+          "cve_ids"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "explanations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cve_id": {
+                  "type": "string"
+                },
+                "affected_package": {
+                  "type": "string"
+                },
+                "installed_version": {
+                  "type": "string"
+                },
+                "fixed_version": {
+                  "type": "string"
+                },
+                "explanation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "explanations": [
+          {
+            "cve_id": "CVE-2026-31337",
+            "affected_package": "openssl",
+            "installed_version": "3.0.7-24.el9",
+            "fixed_version": "3.0.7-25.el9",
+            "explanation": "System has openssl-3.0.7-24.el9.x86_64 installed. CVE-2026-31337 affects openssl versions prior to 3.0.7-25. Advisory RHSA-2026:4501 provides the fix."
+          }
+        ]
+      }
+    },
+    {
+      "name": "vulnerability__get_cve",
+      "description": "Get details about specific CVE.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cve_id": {
+            "type": "string",
+            "description": "CVE identifier (e.g. 'CVE-2026-31337')."
+          }
+        },
+        "required": [
+          "cve_id"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "cvss_score": {
+                "type": "number"
+              },
+              "impact": {
+                "type": "string"
+              },
+              "synopsis": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "public_date": {
+                "type": "string"
+              },
+              "advisory_available": {
+                "type": "boolean"
+              },
+              "systems_affected": {
+                "type": "integer"
+              },
+              "affected_packages": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "errata": {
+                "type": "string"
+              },
+              "cwe": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "id": "CVE-2026-31337",
+        "attributes": {
+          "cvss_score": 9.8,
+          "impact": "Critical",
+          "synopsis": "RHSA-2026:4501: openssl security update",
+          "description": "A critical vulnerability in OpenSSL allows remote code execution via crafted TLS handshake. An attacker can exploit this by sending a specially crafted ClientHello message.",
+          "public_date": "2026-08-15T00:00:00Z",
+          "advisory_available": true,
+          "systems_affected": 12,
+          "affected_packages": [
+            "openssl-3.0.7-24.el9.x86_64",
+            "openssl-libs-3.0.7-24.el9.x86_64"
+          ],
+          "errata": "RHSA-2026:4501",
+          "cwe": "CWE-416"
+        }
+      }
+    },
+    {
+      "name": "vulnerability__get_cve_systems",
+      "description": "Get list of systems affected by a given CVE.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cve": {
+            "type": "string",
+            "description": "CVE identifier (e.g. 'CVE-2026-31337')."
+          },
+          "system_uuid": {
+            "type": "string",
+            "description": "Optional UUID to check if a specific system is affected."
+          }
+        },
+        "required": [
+          "cve"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "System UUID"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "display_name": {
+                      "type": "string"
+                    },
+                    "os_version": {
+                      "type": "string"
+                    },
+                    "advisory_available": {
+                      "type": "boolean"
+                    },
+                    "tags": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "total_items": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "data": [
+          {
+            "id": "68ce32aa-57da-49b7-8ded-dc4ad54e520a",
+            "attributes": {
+              "display_name": "prod-webserver-01.example.com",
+              "os_version": "RHEL 9.4",
+              "advisory_available": true,
+              "tags": [
+                {
+                  "namespace": "insights-client",
+                  "key": "env",
+                  "value": "production"
+                }
+              ]
+            }
+          },
+          {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "attributes": {
+              "display_name": "staging-db-02.example.com",
+              "os_version": "RHEL 9.3",
+              "advisory_available": true,
+              "tags": [
+                {
+                  "namespace": "insights-client",
+                  "key": "env",
+                  "value": "staging"
+                }
+              ]
+            }
+          }
+        ],
+        "meta": {
+          "total_items": 12
+        }
+      }
+    },
+    {
+      "name": "vulnerability__get_cves",
+      "description": "Get list of CVEs affecting the account.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "impact": {
+            "type": "string",
+            "description": "Comma-separated impact IDs: 7=Critical, 6=High, 5=Important, 4=Moderate."
+          },
+          "sort": {
+            "type": "string",
+            "description": "Sort field with optional '-' prefix for descending (e.g. '-cvss_score')."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max records per page (default 10)."
+          },
+          "advisory_available": {
+            "type": "string",
+            "description": "Filter by advisory availability: 'true' = only remediatable, 'true,false' = all."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "cvss_score": {
+                      "type": "number"
+                    },
+                    "impact": {
+                      "type": "string"
+                    },
+                    "synopsis": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "public_date": {
+                      "type": "string"
+                    },
+                    "advisory_available": {
+                      "type": "boolean"
+                    },
+                    "systems_affected": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "total_items": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "data": [
+          {
+            "id": "CVE-2026-31337",
+            "attributes": {
+              "cvss_score": 9.8,
+              "impact": "Critical",
+              "synopsis": "RHSA-2026:4501: openssl security update",
+              "description": "A critical vulnerability in OpenSSL allows remote code execution via crafted TLS handshake.",
+              "public_date": "2026-08-15T00:00:00Z",
+              "advisory_available": true,
+              "systems_affected": 12
+            }
+          },
+          {
+            "id": "CVE-2026-28190",
+            "attributes": {
+              "cvss_score": 8.1,
+              "impact": "High",
+              "synopsis": "RHSA-2026:4320: kernel security update",
+              "description": "A use-after-free vulnerability in the kernel allows local privilege escalation.",
+              "public_date": "2026-07-20T00:00:00Z",
+              "advisory_available": true,
+              "systems_affected": 8
+            }
+          }
+        ],
+        "meta": {
+          "total_items": 47
+        }
+      }
+    },
+    {
+      "name": "vulnerability__get_openapi",
+      "description": "Get Red Hat Lightspeed Vulnerability OpenAPI specification in JSON format.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "vulnerability__get_system_cves",
+      "description": "Get list of CVEs affecting a given system.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "system_uuid": {
+            "type": "string",
+            "description": "System UUID."
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Records per page (default 10)."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Pagination offset."
+          },
+          "sort": {
+            "type": "string",
+            "description": "Sort field with optional '-' prefix for descending."
+          }
+        },
+        "required": [
+          "system_uuid"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "object",
+                  "properties": {
+                    "cvss_score": {
+                      "type": "number"
+                    },
+                    "impact": {
+                      "type": "string"
+                    },
+                    "synopsis": {
+                      "type": "string"
+                    },
+                    "advisory_available": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "total_items": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "data": [
+          {
+            "id": "CVE-2026-31337",
+            "attributes": {
+              "cvss_score": 9.8,
+              "impact": "Critical",
+              "synopsis": "RHSA-2026:4501: openssl security update",
+              "advisory_available": true
+            }
+          },
+          {
+            "id": "CVE-2026-28190",
+            "attributes": {
+              "cvss_score": 8.1,
+              "impact": "High",
+              "synopsis": "RHSA-2026:4320: kernel security update",
+              "advisory_available": true
+            }
+          },
+          {
+            "id": "CVE-2026-15042",
+            "attributes": {
+              "cvss_score": 5.3,
+              "impact": "Moderate",
+              "synopsis": "RHSA-2026:3890: glib2 security update",
+              "advisory_available": false
+            }
+          }
+        ],
+        "meta": {
+          "total_items": 156
+        }
+      }
+    },
+    {
+      "name": "vulnerability__get_systems",
+      "description": "Get list of systems in Red Hat Lightspeed Vulnerability inventory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "outputExample": {
+        "status": "ok"
+      }
+    },
+    {
+      "name": "vulnerability__load_cve_dashboard",
+      "description": "Show, list, or display CVEs \u2014 account-level or for a specific system \u2014 in an interactive dashboard.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Optional search query for the dashboard."
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "dashboard_url": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "critical": {
+                "type": "integer"
+              },
+              "high": {
+                "type": "integer"
+              },
+              "moderate": {
+                "type": "integer"
+              },
+              "low": {
+                "type": "integer"
+              },
+              "total_systems": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "dashboard_url": "https://console.redhat.com/insights/vulnerability/cves",
+        "summary": {
+          "critical": 3,
+          "high": 12,
+          "moderate": 31,
+          "low": 8,
+          "total_systems": 45
+        }
+      }
+    }
+  ]
+}

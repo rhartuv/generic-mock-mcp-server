@@ -1,0 +1,198 @@
+{
+  "description": "Troubleshooting scenario: pod in CrashLoopBackOff due to OOMKilled in namespace 'myapp'. Diagnose via logs/events, inspect deployment, fix memory limits, verify.",
+  "recorded_from": "openshift-mcp-server schema v1.0.0 (synthetic)",
+  "sequence": [
+    {
+      "tool": "namespaces_list",
+      "input": {},
+      "output": {
+        "namespaces": [
+          {"name": "default", "status": "Active", "labels": {}},
+          {"name": "myapp", "status": "Active", "labels": {"app": "myapp", "env": "production"}},
+          {"name": "openshift-monitoring", "status": "Active", "labels": {}},
+          {"name": "openshift-ingress", "status": "Active", "labels": {}},
+          {"name": "kube-system", "status": "Active", "labels": {}}
+        ]
+      }
+    },
+    {
+      "tool": "pods_list_in_namespace",
+      "input": {"namespace": "myapp"},
+      "output": {
+        "pods": [
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "CrashLoopBackOff", "ready": "0/1", "restarts": 5, "node": "worker-0.ocp-lab.example.com", "age": "2h"},
+          {"name": "api-server-7d4b8c6f9-m9n3q", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
+        ]
+      }
+    },
+    {
+      "tool": "pods_get",
+      "input": {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp"},
+      "output": {
+        "name": "api-server-7d4b8c6f9-x2k1p",
+        "namespace": "myapp",
+        "status": "CrashLoopBackOff",
+        "node": "worker-0.ocp-lab.example.com",
+        "ip": "10.128.2.45",
+        "containers": [
+          {
+            "name": "api-server",
+            "image": "registry.example.com/myapp/api-server:v2.3.1",
+            "ready": false,
+            "restart_count": 5,
+            "state": "waiting",
+            "last_termination_reason": "OOMKilled"
+          }
+        ],
+        "labels": {"app": "api-server", "version": "v2.3.1", "pod-template-hash": "7d4b8c6f9"},
+        "created_at": "2026-09-07T08:00:00Z"
+      }
+    },
+    {
+      "tool": "pods_log",
+      "input": {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "previous": true},
+      "output": {
+        "pod": "api-server-7d4b8c6f9-x2k1p",
+        "container": "api-server",
+        "logs": "2026-09-07T10:12:00Z INFO  Starting api-server v2.3.1\n2026-09-07T10:12:01Z INFO  Connected to database at db-postgresql-0.myapp.svc:5432\n2026-09-07T10:12:02Z INFO  Loading product catalog into memory cache...\n2026-09-07T10:13:30Z WARN  Memory usage at 450Mi, approaching limit of 512Mi\n2026-09-07T10:14:15Z WARN  Memory usage at 498Mi, limit is 512Mi\n2026-09-07T10:14:58Z ERROR Failed to allocate memory for cache expansion\n2026-09-07T10:14:58Z FATAL Process killed: OOMKilled\n"
+      }
+    },
+    {
+      "tool": "pods_log",
+      "input": {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp"},
+      "output": {
+        "pod": "api-server-7d4b8c6f9-x2k1p",
+        "container": "api-server",
+        "logs": "2026-09-07T10:15:05Z INFO  Starting api-server v2.3.1\n2026-09-07T10:15:06Z INFO  Connected to database at db-postgresql-0.myapp.svc:5432\n2026-09-07T10:15:07Z INFO  Loading product catalog into memory cache...\n"
+      }
+    },
+    {
+      "tool": "events_list",
+      "input": {"namespace": "myapp"},
+      "output": {
+        "events": [
+          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.oom1", "type": "Warning", "reason": "OOMKilling", "message": "Memory cgroup out of memory: Killed process 45678 (api-server) total-vm:620480kB, anon-rss:524288kB", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T10:14:58Z"},
+          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.backoff1", "type": "Warning", "reason": "BackOff", "message": "Back-off restarting failed container api-server in pod api-server-7d4b8c6f9-x2k1p_myapp", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T10:15:30Z"},
+          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.pulled1", "type": "Normal", "reason": "Pulled", "message": "Container image \"registry.example.com/myapp/api-server:v2.3.1\" already present on machine", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T10:15:02Z"},
+          {"namespace": "myapp", "name": "web-frontend-5b9c7d8e4f-abc12.healthy", "type": "Normal", "reason": "Pulled", "message": "Container image already present on machine", "object": "Pod/web-frontend-5b9c7d8e4f-abc12", "last_seen": "2026-09-02T08:00:00Z"}
+        ]
+      }
+    },
+    {
+      "tool": "nodes_top",
+      "input": {},
+      "output": {
+        "nodes": [
+          {"name": "master-0.ocp-lab.example.com", "cpu_usage": "850m", "cpu_percent": "21%", "memory_usage": "6144Mi", "memory_percent": "48%"},
+          {"name": "worker-0.ocp-lab.example.com", "cpu_usage": "2100m", "cpu_percent": "52%", "memory_usage": "24Gi", "memory_percent": "75%"},
+          {"name": "worker-1.ocp-lab.example.com", "cpu_usage": "1400m", "cpu_percent": "35%", "memory_usage": "18Gi", "memory_percent": "56%"}
+        ]
+      }
+    },
+    {
+      "tool": "pods_top",
+      "input": {"namespace": "myapp"},
+      "output": {
+        "pods": [
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "cpu_usage": "480m", "memory_usage": "498Mi"},
+          {"name": "api-server-7d4b8c6f9-m9n3q", "namespace": "myapp", "cpu_usage": "350m", "memory_usage": "420Mi"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "cpu_usage": "120m", "memory_usage": "256Mi"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "cpu_usage": "200m", "memory_usage": "1Gi"}
+        ]
+      }
+    },
+    {
+      "tool": "resources_get",
+      "input": {"apiVersion": "apps/v1", "kind": "Deployment", "name": "api-server", "namespace": "myapp"},
+      "output": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {"name": "api-server", "namespace": "myapp", "labels": {"app": "api-server"}, "resourceVersion": "184501"},
+        "spec": {
+          "replicas": 2,
+          "selector": {"matchLabels": {"app": "api-server"}},
+          "template": {
+            "metadata": {"labels": {"app": "api-server", "version": "v2.3.1"}},
+            "spec": {
+              "containers": [
+                {
+                  "name": "api-server",
+                  "image": "registry.example.com/myapp/api-server:v2.3.1",
+                  "ports": [{"containerPort": 8080}],
+                  "resources": {
+                    "limits": {"memory": "512Mi", "cpu": "500m"},
+                    "requests": {"memory": "256Mi", "cpu": "250m"}
+                  },
+                  "env": [
+                    {"name": "DB_HOST", "value": "db-postgresql-0.myapp.svc"},
+                    {"name": "CACHE_ENABLED", "value": "true"}
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "status": {"replicas": 2, "readyReplicas": 1, "availableReplicas": 1, "unavailableReplicas": 1}
+      }
+    },
+    {
+      "tool": "resources_create_or_update",
+      "input": {"resource": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api-server\n  namespace: myapp\nspec:\n  template:\n    spec:\n      containers:\n      - name: api-server\n        resources:\n          limits:\n            memory: 1Gi\n            cpu: 500m\n          requests:\n            memory: 512Mi\n            cpu: 250m\n"},
+      "output": {
+        "kind": "Deployment",
+        "name": "api-server",
+        "namespace": "myapp",
+        "action": "configured",
+        "resource_version": "184729"
+      }
+    },
+    {
+      "tool": "pods_list_in_namespace",
+      "input": {"namespace": "myapp"},
+      "output": {
+        "pods": [
+          {"name": "api-server-8e5c9d7f0-r4t2w", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30s"},
+          {"name": "api-server-8e5c9d7f0-k7p5n", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "25s"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
+        ]
+      }
+    },
+    {
+      "tool": "resources_get",
+      "input": {"apiVersion": "apps/v1", "kind": "Deployment", "name": "api-server", "namespace": "myapp"},
+      "output": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {"name": "api-server", "namespace": "myapp", "labels": {"app": "api-server"}, "resourceVersion": "184729"},
+        "spec": {
+          "replicas": 2,
+          "selector": {"matchLabels": {"app": "api-server"}},
+          "template": {
+            "metadata": {"labels": {"app": "api-server", "version": "v2.3.1"}},
+            "spec": {
+              "containers": [
+                {
+                  "name": "api-server",
+                  "image": "registry.example.com/myapp/api-server:v2.3.1",
+                  "ports": [{"containerPort": 8080}],
+                  "resources": {
+                    "limits": {"memory": "1Gi", "cpu": "500m"},
+                    "requests": {"memory": "512Mi", "cpu": "250m"}
+                  },
+                  "env": [
+                    {"name": "DB_HOST", "value": "db-postgresql-0.myapp.svc"},
+                    {"name": "CACHE_ENABLED", "value": "true"}
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "status": {"replicas": 2, "readyReplicas": 2, "availableReplicas": 2, "unavailableReplicas": 0}
+      }
+    }
+  ]
+}

@@ -1,0 +1,658 @@
+{
+  "name": "openshift-mcp-server",
+  "version": "1.0.0",
+  "description": "Mock schema for the OpenShift MCP Server (core + config toolsets). Covers cluster resource management, pod operations, node metrics, and configuration.",
+  "tools": [
+    {
+      "name": "configuration_contexts_list",
+      "description": "List all available context names and associated server urls from the kubeconfig file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "contexts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "cluster": {"type": "string"},
+                "user": {"type": "string"},
+                "server": {"type": "string"}
+              }
+            }
+          },
+          "current_context": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "contexts": [
+          {"name": "default/api-ocp-lab-example-com:6443/admin", "cluster": "api-ocp-lab-example-com:6443", "user": "admin", "server": "https://api.ocp-lab.example.com:6443"},
+          {"name": "staging/api-ocp-staging-example-com:6443/developer", "cluster": "api-ocp-staging-example-com:6443", "user": "developer", "server": "https://api.ocp-staging.example.com:6443"}
+        ],
+        "current_context": "default/api-ocp-lab-example-com:6443/admin"
+      }
+    },
+    {
+      "name": "configuration_view",
+      "description": "Get the current Kubernetes configuration content as a kubeconfig YAML.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "minified": {"type": "boolean", "description": "Return a minified version keeping only the current-context and relevant config. Default true."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "kubeconfig": {"type": "string", "description": "YAML content of the kubeconfig"}
+        }
+      },
+      "outputExample": {
+        "kubeconfig": "apiVersion: v1\nclusters:\n- cluster:\n    server: https://api.ocp-lab.example.com:6443\n  name: api-ocp-lab-example-com:6443\ncontexts:\n- context:\n    cluster: api-ocp-lab-example-com:6443\n    namespace: default\n    user: admin\n  name: default/api-ocp-lab-example-com:6443/admin\ncurrent-context: default/api-ocp-lab-example-com:6443/admin\nkind: Config\n"
+      }
+    },
+    {
+      "name": "events_list",
+      "description": "List all the Kubernetes events in the current cluster. Can be filtered by namespace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "namespace": {"type": "string", "description": "Namespace to retrieve events from. If not provided, lists events from all namespaces."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "namespace": {"type": "string"},
+                "name": {"type": "string"},
+                "type": {"type": "string", "enum": ["Normal", "Warning"]},
+                "reason": {"type": "string"},
+                "message": {"type": "string"},
+                "object": {"type": "string"},
+                "last_seen": {"type": "string", "format": "date-time"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "events": [
+          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.event1", "type": "Warning", "reason": "OOMKilled", "message": "Container api-server exceeded memory limit", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T10:15:00Z"},
+          {"namespace": "openshift-monitoring", "name": "prometheus-k8s-0.event1", "type": "Normal", "reason": "Pulled", "message": "Successfully pulled image", "object": "Pod/prometheus-k8s-0", "last_seen": "2026-09-07T09:00:00Z"}
+        ]
+      }
+    },
+    {
+      "name": "namespaces_list",
+      "description": "List all the Kubernetes namespaces in the current cluster.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "namespaces": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "status": {"type": "string", "enum": ["Active", "Terminating"]},
+                "labels": {"type": "object"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "namespaces": [
+          {"name": "default", "status": "Active", "labels": {}},
+          {"name": "myapp", "status": "Active", "labels": {"app": "myapp", "env": "production"}},
+          {"name": "openshift-monitoring", "status": "Active", "labels": {}},
+          {"name": "openshift-ingress", "status": "Active", "labels": {}},
+          {"name": "kube-system", "status": "Active", "labels": {}}
+        ]
+      }
+    },
+    {
+      "name": "nodes_log",
+      "description": "Get logs from a Kubernetes node (kubelet, kube-proxy, or other system logs).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the node to get logs from."},
+          "query": {"type": "string", "description": "Service or file to return logs from (e.g. 'kubelet', '/var/log/kube-proxy.log')."},
+          "tailLines": {"type": "integer", "description": "Number of lines from the end of the logs. 0 means all.", "default": 100}
+        },
+        "required": ["name", "query"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "node": {"type": "string"},
+          "query": {"type": "string"},
+          "logs": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "node": "worker-0.ocp-lab.example.com",
+        "query": "kubelet",
+        "logs": "Sep 07 10:14:58 worker-0 kubelet[1523]: I0907 10:14:58.123456 1523 kubelet.go:2345] SyncLoop (PLEG): event for pod \"myapp/api-server-7d4b8c6f9-x2k1p\"\nSep 07 10:15:00 worker-0 kubelet[1523]: W0907 10:15:00.234567 1523 oom_linux.go:67] Container api-server in pod api-server-7d4b8c6f9-x2k1p exceeded memory limit\n"
+      }
+    },
+    {
+      "name": "nodes_stats_summary",
+      "description": "Get detailed resource usage statistics from a node via the kubelet Summary API.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the node to get stats from."}
+        },
+        "required": ["name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "node_name": {"type": "string"},
+          "cpu": {"type": "object", "properties": {"usage_nano_cores": {"type": "integer"}, "usage_core_nano_seconds": {"type": "integer"}}},
+          "memory": {"type": "object", "properties": {"available_bytes": {"type": "integer"}, "usage_bytes": {"type": "integer"}, "working_set_bytes": {"type": "integer"}}},
+          "fs": {"type": "object", "properties": {"available_bytes": {"type": "integer"}, "capacity_bytes": {"type": "integer"}, "used_bytes": {"type": "integer"}}},
+          "pods_count": {"type": "integer"}
+        }
+      },
+      "outputExample": {
+        "node_name": "worker-0.ocp-lab.example.com",
+        "cpu": {"usage_nano_cores": 1250000000, "usage_core_nano_seconds": 45678901234567},
+        "memory": {"available_bytes": 8589934592, "usage_bytes": 25769803776, "working_set_bytes": 24696061952},
+        "fs": {"available_bytes": 107374182400, "capacity_bytes": 214748364800, "used_bytes": 96636764160},
+        "pods_count": 42
+      }
+    },
+    {
+      "name": "nodes_top",
+      "description": "List node resource consumption (CPU and memory) from Metrics Server.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the node. All nodes if not provided."},
+          "label_selector": {"type": "string", "description": "Label selector to filter nodes (e.g. 'node-role.kubernetes.io/worker=')."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "cpu_usage": {"type": "string"},
+                "cpu_percent": {"type": "string"},
+                "memory_usage": {"type": "string"},
+                "memory_percent": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "nodes": [
+          {"name": "master-0.ocp-lab.example.com", "cpu_usage": "850m", "cpu_percent": "21%", "memory_usage": "6144Mi", "memory_percent": "48%"},
+          {"name": "worker-0.ocp-lab.example.com", "cpu_usage": "2100m", "cpu_percent": "52%", "memory_usage": "24Gi", "memory_percent": "75%"},
+          {"name": "worker-1.ocp-lab.example.com", "cpu_usage": "1400m", "cpu_percent": "35%", "memory_usage": "18Gi", "memory_percent": "56%"}
+        ]
+      }
+    },
+    {
+      "name": "pods_delete",
+      "description": "Delete a pod in a specified namespace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the pod to delete."},
+          "namespace": {"type": "string", "description": "Namespace to delete the pod from."}
+        },
+        "required": ["name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "name": "api-server-7d4b8c6f9-x2k1p",
+        "namespace": "myapp",
+        "status": "deleted"
+      }
+    },
+    {
+      "name": "pods_exec",
+      "description": "Execute a command in a pod container.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the pod."},
+          "namespace": {"type": "string", "description": "Namespace of the pod."},
+          "command": {"type": "array", "items": {"type": "string"}, "description": "Command to execute. First item is the command, rest are arguments."},
+          "container": {"type": "string", "description": "Container name (optional)."}
+        },
+        "required": ["name", "command"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "stdout": {"type": "string"},
+          "stderr": {"type": "string"},
+          "exit_code": {"type": "integer"}
+        }
+      },
+      "outputExample": {
+        "stdout": "total 24\ndrwxr-xr-x 2 root root 4096 Sep  7 08:00 bin\ndrwxr-xr-x 2 root root 4096 Sep  7 08:00 etc\n",
+        "stderr": "",
+        "exit_code": 0
+      }
+    },
+    {
+      "name": "pods_get",
+      "description": "Get details of a specific pod.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the pod."},
+          "namespace": {"type": "string", "description": "Namespace to get the pod from."}
+        },
+        "required": ["name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "status": {"type": "string"},
+          "node": {"type": "string"},
+          "ip": {"type": "string"},
+          "containers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "image": {"type": "string"},
+                "ready": {"type": "boolean"},
+                "restart_count": {"type": "integer"},
+                "state": {"type": "string"},
+                "last_termination_reason": {"type": "string"}
+              }
+            }
+          },
+          "labels": {"type": "object"},
+          "created_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "outputExample": {
+        "name": "api-server-7d4b8c6f9-x2k1p",
+        "namespace": "myapp",
+        "status": "Running",
+        "node": "worker-0.ocp-lab.example.com",
+        "ip": "10.128.2.45",
+        "containers": [
+          {"name": "api-server", "image": "registry.example.com/myapp/api-server:v2.3.1", "ready": true, "restart_count": 0, "state": "running", "last_termination_reason": ""}
+        ],
+        "labels": {"app": "api-server", "version": "v2.3.1"},
+        "created_at": "2026-09-07T08:00:00Z"
+      }
+    },
+    {
+      "name": "pods_list",
+      "description": "List all pods in the cluster from all namespaces.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "labelSelector": {"type": "string", "description": "Label selector to filter pods (e.g. 'app=myapp,env=prod')."},
+          "fieldSelector": {"type": "string", "description": "Field selector to filter pods (e.g. 'status.phase=Running')."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "pods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "namespace": {"type": "string"},
+                "status": {"type": "string"},
+                "ready": {"type": "string"},
+                "restarts": {"type": "integer"},
+                "node": {"type": "string"},
+                "age": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "pods": [
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "2h"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
+          {"name": "prometheus-k8s-0", "namespace": "openshift-monitoring", "status": "Running", "ready": "3/3", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
+        ]
+      }
+    },
+    {
+      "name": "pods_list_in_namespace",
+      "description": "List all pods in a specified namespace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "namespace": {"type": "string", "description": "Namespace to list pods from."},
+          "labelSelector": {"type": "string", "description": "Label selector to filter pods."},
+          "fieldSelector": {"type": "string", "description": "Field selector to filter pods."}
+        },
+        "required": ["namespace"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "pods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "namespace": {"type": "string"},
+                "status": {"type": "string"},
+                "ready": {"type": "string"},
+                "restarts": {"type": "integer"},
+                "node": {"type": "string"},
+                "age": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "pods": [
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "CrashLoopBackOff", "ready": "0/1", "restarts": 5, "node": "worker-0.ocp-lab.example.com", "age": "2h"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
+        ]
+      }
+    },
+    {
+      "name": "pods_log",
+      "description": "Get logs from a pod container.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Name of the pod."},
+          "namespace": {"type": "string", "description": "Namespace of the pod."},
+          "container": {"type": "string", "description": "Container name (optional)."},
+          "tail": {"type": "integer", "description": "Number of lines from the end. Default 100.", "default": 100},
+          "previous": {"type": "boolean", "description": "Return previous terminated container logs."}
+        },
+        "required": ["name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "pod": {"type": "string"},
+          "container": {"type": "string"},
+          "logs": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "pod": "api-server-7d4b8c6f9-x2k1p",
+        "container": "api-server",
+        "logs": "2026-09-07T10:14:55Z INFO  Starting api-server v2.3.1\n2026-09-07T10:14:56Z INFO  Connected to database\n2026-09-07T10:14:57Z INFO  Listening on :8080\n"
+      }
+    },
+    {
+      "name": "pods_run",
+      "description": "Run a new pod with a specified container image.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "image": {"type": "string", "description": "Container image to run."},
+          "name": {"type": "string", "description": "Name of the pod (optional, random if not provided)."},
+          "namespace": {"type": "string", "description": "Namespace to run the pod in."},
+          "port": {"type": "integer", "description": "TCP/IP port to expose (optional)."}
+        },
+        "required": ["image"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "image": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "name": "debug-pod",
+        "namespace": "myapp",
+        "image": "registry.access.redhat.com/ubi9/ubi-minimal:latest",
+        "status": "Pending"
+      }
+    },
+    {
+      "name": "pods_top",
+      "description": "List pod resource consumption (CPU and memory) from Metrics Server.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "description": "Pod name (optional, all pods if not provided)."},
+          "namespace": {"type": "string", "description": "Namespace (optional, current namespace if not provided)."},
+          "all_namespaces": {"type": "boolean", "description": "List pods from all namespaces. Default true.", "default": true},
+          "label_selector": {"type": "string", "description": "Label selector to filter pods."}
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "pods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "namespace": {"type": "string"},
+                "cpu_usage": {"type": "string"},
+                "memory_usage": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "pods": [
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "cpu_usage": "450m", "memory_usage": "512Mi"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "cpu_usage": "120m", "memory_usage": "256Mi"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "cpu_usage": "200m", "memory_usage": "1Gi"}
+        ]
+      }
+    },
+    {
+      "name": "resources_create_or_update",
+      "description": "Create or update a Kubernetes resource from YAML or JSON.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "resource": {"type": "string", "description": "A JSON or YAML representation of the Kubernetes resource (apiVersion, kind, metadata, spec)."}
+        },
+        "required": ["resource"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string"},
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "action": {"type": "string", "enum": ["created", "configured"]},
+          "resource_version": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "kind": "Deployment",
+        "name": "api-server",
+        "namespace": "myapp",
+        "action": "configured",
+        "resource_version": "184729"
+      }
+    },
+    {
+      "name": "resources_delete",
+      "description": "Delete a Kubernetes resource by apiVersion, kind, and name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {"type": "string", "description": "apiVersion of the resource (e.g. v1, apps/v1)."},
+          "kind": {"type": "string", "description": "Kind of the resource (e.g. Pod, Deployment)."},
+          "name": {"type": "string", "description": "Name of the resource."},
+          "namespace": {"type": "string", "description": "Namespace (optional, for namespaced resources)."}
+        },
+        "required": ["apiVersion", "kind", "name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string"},
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "status": {"type": "string"}
+        }
+      },
+      "outputExample": {
+        "kind": "Pod",
+        "name": "debug-pod",
+        "namespace": "myapp",
+        "status": "deleted"
+      }
+    },
+    {
+      "name": "resources_get",
+      "description": "Get details of a specific Kubernetes resource by apiVersion, kind, and name.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {"type": "string", "description": "apiVersion of the resource (e.g. v1, apps/v1)."},
+          "kind": {"type": "string", "description": "Kind of the resource (e.g. Pod, Deployment)."},
+          "name": {"type": "string", "description": "Name of the resource."},
+          "namespace": {"type": "string", "description": "Namespace (optional, for namespaced resources)."}
+        },
+        "required": ["apiVersion", "kind", "name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {"type": "string"},
+          "kind": {"type": "string"},
+          "metadata": {"type": "object"},
+          "spec": {"type": "object"},
+          "status": {"type": "object"}
+        }
+      },
+      "outputExample": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {"name": "api-server", "namespace": "myapp", "labels": {"app": "api-server"}},
+        "spec": {"replicas": 2, "selector": {"matchLabels": {"app": "api-server"}}, "template": {"spec": {"containers": [{"name": "api-server", "image": "registry.example.com/myapp/api-server:v2.3.1", "resources": {"limits": {"memory": "512Mi", "cpu": "500m"}, "requests": {"memory": "256Mi", "cpu": "250m"}}}]}}},
+        "status": {"replicas": 2, "readyReplicas": 1, "availableReplicas": 1, "conditions": [{"type": "Available", "status": "True"}]}
+      }
+    },
+    {
+      "name": "resources_list",
+      "description": "List Kubernetes resources by apiVersion and kind.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {"type": "string", "description": "apiVersion of the resources (e.g. v1, apps/v1)."},
+          "kind": {"type": "string", "description": "Kind of the resources (e.g. Pod, Deployment)."},
+          "namespace": {"type": "string", "description": "Namespace (optional, all namespaces if not provided)."},
+          "labelSelector": {"type": "string", "description": "Label selector to filter resources."},
+          "fieldSelector": {"type": "string", "description": "Field selector to filter resources."}
+        },
+        "required": ["apiVersion", "kind"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {"type": "string"},
+                "namespace": {"type": "string"},
+                "kind": {"type": "string"},
+                "status": {"type": "string"},
+                "age": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "outputExample": {
+        "items": [
+          {"name": "api-server", "namespace": "myapp", "kind": "Deployment", "status": "1/2", "age": "5d"},
+          {"name": "web-frontend", "namespace": "myapp", "kind": "Deployment", "status": "1/1", "age": "30d"}
+        ]
+      }
+    },
+    {
+      "name": "resources_scale",
+      "description": "Get or update the scale of a Kubernetes resource. If scale is provided, updates it. Always returns current scale.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiVersion": {"type": "string", "description": "apiVersion of the resource (e.g. apps/v1)."},
+          "kind": {"type": "string", "description": "Kind of the resource (e.g. Deployment, StatefulSet)."},
+          "name": {"type": "string", "description": "Name of the resource."},
+          "namespace": {"type": "string", "description": "Namespace (optional)."},
+          "scale": {"type": "integer", "description": "New scale value. If not provided, returns current scale without updating."}
+        },
+        "required": ["apiVersion", "kind", "name"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "kind": {"type": "string"},
+          "name": {"type": "string"},
+          "namespace": {"type": "string"},
+          "current_replicas": {"type": "integer"},
+          "desired_replicas": {"type": "integer"}
+        }
+      },
+      "outputExample": {
+        "kind": "Deployment",
+        "name": "api-server",
+        "namespace": "myapp",
+        "current_replicas": 2,
+        "desired_replicas": 2
+      }
+    }
+  ]
+}
