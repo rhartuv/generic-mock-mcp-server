@@ -62,24 +62,66 @@ class StaticStrategy(ResponseStrategy):
         return json.dumps(example, indent=2)
 
 
+def _values_equal(expected: Any, actual: Any) -> bool:
+    if expected == actual:
+        return True
+    if isinstance(expected, bool) or isinstance(actual, bool):
+        return expected == actual
+    return str(expected) == str(actual)
+
+
+def fixture_input_matches(expected: Any, arguments: dict[str, Any]) -> bool:
+    """True if fixture input is empty (any args) or is a subset of the call arguments."""
+    if not expected:
+        return True
+    if not isinstance(expected, dict):
+        return False
+    for key, value in expected.items():
+        if key not in arguments or not _values_equal(value, arguments[key]):
+            return False
+    return True
+
+
+def _format_fixture_output(output: Any) -> str:
+    if isinstance(output, str):
+        return output
+    return json.dumps(output, indent=2)
+
+
 class FixturesStrategy(ResponseStrategy):
-    """Returns responses from a fixtures.json file, matched by tool name in sequence order."""
+    """Returns responses from a fixtures file.
+
+    Prefers the first unused sequence entry whose tool name matches and whose
+    ``input`` is a subset of the call arguments. Empty ``input`` matches any
+    arguments. If nothing matches, logs a warning and falls back to outputExample.
+    """
 
     def __init__(self, fixtures_path: Path):
         with open(fixtures_path) as f:
             data = json.load(f)
         self._sequence = data.get("sequence", [])
-        self._cursor: dict[str, int] = {}
+        self._used: set[int] = set()
 
     def generate(self, tool_name: str, tool_schema: dict, arguments: dict[str, Any]) -> str:
-        matches = [f for f in self._sequence if f["tool"] == tool_name]
-        idx = self._cursor.get(tool_name, 0)
-        if idx < len(matches):
-            self._cursor[tool_name] = idx + 1
-            output = matches[idx]["output"]
-            if isinstance(output, str):
-                return output
-            return json.dumps(output, indent=2)
+        for index, fixture in enumerate(self._sequence):
+            if index in self._used or fixture.get("tool") != tool_name:
+                continue
+            if fixture_input_matches(fixture.get("input"), arguments):
+                self._used.add(index)
+                return _format_fixture_output(fixture.get("output"))
+
+        unused_for_tool = [
+            fixture.get("input")
+            for index, fixture in enumerate(self._sequence)
+            if index not in self._used and fixture.get("tool") == tool_name
+        ]
+        if unused_for_tool:
+            logger.warning(
+                "No fixture input matched %s(%s); unused inputs=%s; falling back to outputExample",
+                tool_name,
+                json.dumps(arguments, default=str),
+                json.dumps(unused_for_tool, default=str),
+            )
         example = tool_schema.get("outputExample")
         if example:
             return json.dumps(example, indent=2)

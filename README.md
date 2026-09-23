@@ -100,14 +100,14 @@ Skill authors provide a fixtures file per scenario (recommended name: `fixtures-
 }
 ```
 
-Responses are matched by tool name and served in sequence order. When fixtures for a tool are exhausted, the server falls back to the schema's `outputExample`.
+When a fixture includes ``input``, the mock matches **tool name + those argument values** (extra call arguments are ignored). Empty ``input`` (`{}`) matches any arguments for that tool, in file order. If no unused fixture matches, a warning is logged and the schema ``outputExample`` is used — the mock does not silently return the next tool's canned payload.
 
 ### Response strategies
 
 | Strategy | Behavior | Use case |
 |---|---|---|
 | `static` | Returns the `outputExample` from the schema verbatim | Single-tool testing, smoke tests |
-| `fixtures` | Returns ordered responses from a fixtures file, matched by tool name | Multi-step skill evaluation, certification gates |
+| `fixtures` | Returns matching fixture output (`tool` + `input`); falls back to `outputExample` | Multi-step skill evaluation, certification gates |
 | `llm` | Generates coherent responses via LLM (requires `ANTHROPIC_API_KEY`) | Exploratory testing, regression sweeps |
 
 ### Settings

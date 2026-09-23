@@ -85,6 +85,76 @@ def test_fixtures_strategy():
     print("PASS: fixtures strategy returns correct fixture for install_cluster")
 
 
+def test_fixtures_match_by_input_not_call_order():
+    from server import FixturesStrategy
+    strategy = FixturesStrategy(
+        Path(__file__).resolve().parent.parent / "configs/lightspeed-mcp/fixtures-cve-validation.json"
+    )
+    tool_schema = {"outputExample": {"id": "fallback"}}
+
+    first = json.loads(strategy.generate(
+        "vulnerability__get_cve", tool_schema, {"cve_id": "CVE-2026-99999"},
+    ))
+    second = json.loads(strategy.generate(
+        "vulnerability__get_cve", tool_schema, {"cve_id": "CVE-2026-31337"},
+    ))
+    assert first["id"] == "CVE-2026-99999"
+    assert second["id"] == "CVE-2026-31337"
+    print("PASS: fixtures match by input even when call order differs from the file")
+
+
+def test_fixtures_mismatch_warns_and_falls_back():
+    import logging
+    from server import FixturesStrategy
+
+    strategy = FixturesStrategy(FIXTURES_PATH)
+    schema = json.loads(SCHEMA_PATH.read_text())
+    tool_map = {t["name"]: t for t in schema["tools"]}
+    warnings: list[str] = []
+
+    class Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            if record.levelno >= logging.WARNING:
+                warnings.append(record.getMessage())
+
+    log = logging.getLogger("server")
+    handler = Capture()
+    log.addHandler(handler)
+    try:
+        parsed = json.loads(strategy.generate(
+            "create_cluster",
+            tool_map["create_cluster"],
+            {"name": "wrong-name", "version": "4.18.2", "base_domain": "lab.example.com", "single_node": True},
+        ))
+    finally:
+        log.removeHandler(handler)
+
+    assert parsed["cluster_id"] == "ff001122-aabb-ccdd-eeff-001122334455"
+    assert any("No fixture input matched create_cluster" in w for w in warnings)
+    print("PASS: input mismatch logs a warning and falls back to outputExample")
+
+    matched = json.loads(strategy.generate("create_cluster", tool_map["create_cluster"], {
+        "name": "edge-sno", "version": "4.18.2", "base_domain": "lab.example.com", "single_node": True,
+    }))
+    assert matched["cluster_id"] == "cc001122-dead-beef-cafe-001122334455"
+    print("PASS: matching input still returns the fixture after a mismatch")
+
+
+def test_fixtures_exhaustion_falls_back():
+    from server import FixturesStrategy
+    strategy = FixturesStrategy(FIXTURES_PATH)
+    schema = json.loads(SCHEMA_PATH.read_text())
+    tool_map = {t["name"]: t for t in schema["tools"]}
+    args = {
+        "name": "edge-sno", "version": "4.18.2", "base_domain": "lab.example.com", "single_node": True,
+    }
+    first = json.loads(strategy.generate("create_cluster", tool_map["create_cluster"], args))
+    second = json.loads(strategy.generate("create_cluster", tool_map["create_cluster"], args))
+    assert first["cluster_id"] == "cc001122-dead-beef-cafe-001122334455"
+    assert second["cluster_id"] == "ff001122-aabb-ccdd-eeff-001122334455"
+    print("PASS: exhausted matching fixtures fall back to outputExample")
+
+
 def test_server_build():
     from server import build_server, load_schema, StaticStrategy
     schema = load_schema(SCHEMA_PATH)
@@ -130,6 +200,9 @@ if __name__ == "__main__":
     test_schema_loading()
     test_static_strategy()
     test_fixtures_strategy()
+    test_fixtures_match_by_input_not_call_order()
+    test_fixtures_mismatch_warns_and_falls_back()
+    test_fixtures_exhaustion_falls_back()
     test_server_build()
     test_tool_execution()
     print("\nAll tests passed.")

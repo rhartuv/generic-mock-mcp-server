@@ -23,7 +23,7 @@ The server is a single `server.py` that uses the MCP SDK (v2) to register tools 
 ### Response Strategies
 
 - **Static**: Returns the `outputExample` from the schema verbatim. Deterministic, no coherence between calls. Good for single-tool skills.
-- **Fixtures**: Returns pre-defined responses from `fixtures.json`, matched by tool name in sequence order. Deterministic and coherent across multi-step flows. Good for certification/gate evaluations.
+- **Fixtures**: Returns pre-defined responses from `fixtures.json`, matched by tool name and `input` (empty `input` matches any args). Deterministic and coherent across multi-step flows. Good for certification/gate evaluations.
 - **LLM**: Uses an LLM to generate responses based on schema + call history. Zero maintenance, automatic coherence. Good for exploratory/regression evaluations. Reuses the evaluation pipeline's LLM endpoint.
 
 ### Configuration
@@ -102,7 +102,7 @@ Skill authors provide a fixtures file per scenario (e.g. `fixtures-oomkilled.jso
 }
 ```
 
-Responses are matched by tool name and served in order. If a tool is called more times than it has fixtures, the server falls back to the schema's `outputExample`.
+When ``input`` is present, the mock matches tool name plus those arguments (extra call args are ignored). Empty ``input`` matches any arguments. If nothing matches, a warning is logged and the schema ``outputExample`` is returned.
 
 ## Environment Variables
 

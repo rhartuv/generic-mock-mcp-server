@@ -171,7 +171,7 @@ Run in order against `fixtures-oomkilled.json`:
 | 11 | `pods_list_in_namespace` | `namespace=myapp` | Pod Running after fix |
 | 12 | `resources_get` | Deployment `api-server` | Updated limits confirmed |
 
-Fixtures are matched by **tool name in sequence order**, not by argument values. Restart the server (or container) to reset fixture cursors.
+Fixtures are matched by **tool name and `input`**. Empty `input` (`{}`) matches any arguments. If the call arguments do not match an unused fixture, the mock logs a warning and returns the schema `outputExample` instead of the next unrelated payload. Restart the server (or container) to reuse fixtures.
 
 ### Fixture exhaustion
 
@@ -183,7 +183,7 @@ After all fixtures for a tool are consumed, subsequent calls fall back to the `o
 |---|---|---|
 | Client shows "connecting..." forever | URL uses `localhost` (resolves to IPv6) | Change URL to `127.0.0.1` |
 | curl returns "Connection reset by peer" | curl tried IPv6 | Use `curl -4` or `127.0.0.1` |
-| Fixture returns unexpected data | Fixtures are sequential per tool name | Restart the server to reset fixture cursors |
+| Fixture returns unexpected data | Call arguments did not match fixture `input`, or fixtures for that tool are used up | Check `input` in the fixtures file; restart the server to reuse fixtures |
 | Wrong scenario responses | Mounted the wrong fixtures file | Confirm `fixtures-oomkilled.json` is mounted to `/config/fixtures.json` |
 
 ## Schema tools (20)

@@ -191,7 +191,7 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
 
 ### CVE Impact Analysis — full fixture sequence
 
-Run in order against `fixtures-cve-impact.json` (not `fixtures-cve-validation.json`):
+Run in order against `fixtures-cve-impact.json` (not `fixtures-cve-validation.json`). Each step is also matched by `input`, so a call with a different `cve_id` / `host_id` will not receive another tool's payload.
 
 | Step | Tool | Arguments | Expected result |
 |---|---|---|---|
@@ -232,7 +232,7 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
 | Claude Code shows "socket closed unexpectedly" | Server built with `json_response=True` | Rebuild image — the server must use SSE (default) |
 | Claude Code shows `type` field warning | Missing `"type": "http"` in `.mcp.json` | Add `"type": "http"` to the server config |
 | curl returns "Connection reset by peer" | curl tried IPv6 | Use `curl -4` or `127.0.0.1` |
-| Fixture returns wrong data | Fixtures are sequential per tool name | Restart the container to reset fixture cursors |
+| Fixture returns wrong data | Call arguments did not match fixture `input`, or fixtures for that tool are used up | Check `input` in the fixtures file (e.g. `cve_id`); restart the container to reuse fixtures |
 | No logs in `podman logs` | Server not started or crashed | Check `podman ps`; rebuild if code changed |
 
 ## Schema tools (46)
