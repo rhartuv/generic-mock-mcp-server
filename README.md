@@ -32,11 +32,13 @@ AI skills depend on MCP servers for tool access. Evaluating skills end-to-end re
 └── configs/                    # Pre-built MCP configs
     ├── openshift-mcp-server/
     │   ├── schema.json
-    │   └── fixtures.json
+    │   ├── fixtures-oomkilled.json
+    │   └── USAGE.md            # Deploy & curl test guide
     └── lightspeed-mcp/
         ├── schema.json
-        ├── fixtures.json
-        └── USAGE.md            # Curl test guide
+        ├── fixtures-cve-impact.json
+        ├── fixtures-cve-validation.json
+        └── USAGE.md            # Deploy & curl test guide
 ```
 
 ## Prerequisites
@@ -57,7 +59,9 @@ The server requires one or two JSON files:
 | File | Required | Purpose |
 |---|---|---|
 | `schema.json` | Yes | Tool definitions (name, description, inputSchema, outputSchema, outputExample) |
-| `fixtures.json` | For `fixtures` strategy | Ordered sequence of tool responses for multi-step flows |
+| `fixtures-<scenario>.json` | For `fixtures` strategy | Ordered sequence of tool responses for one multi-step scenario |
+
+Name each fixtures file after the scenario (e.g. `fixtures-cve-validation.json`, `fixtures-oomkilled.json`). When mounting into the container, map it to `/config/fixtures.json`.
 
 ### Schema format
 
@@ -85,7 +89,7 @@ MCP server developers publish a `schema.json` alongside their server:
 
 ### Fixtures format
 
-Skill authors provide a `fixtures.json` for multi-step flows:
+Skill authors provide a fixtures file per scenario (recommended name: `fixtures-<scenario>.json`):
 
 ```json
 {
@@ -103,7 +107,7 @@ Responses are matched by tool name and served in sequence order. When fixtures f
 | Strategy | Behavior | Use case |
 |---|---|---|
 | `static` | Returns the `outputExample` from the schema verbatim | Single-tool testing, smoke tests |
-| `fixtures` | Returns ordered responses from `fixtures.json`, matched by tool name | Multi-step skill evaluation, certification gates |
+| `fixtures` | Returns ordered responses from a fixtures file, matched by tool name | Multi-step skill evaluation, certification gates |
 | `llm` | Generates coherent responses via LLM (requires `ANTHROPIC_API_KEY`) | Exploratory testing, regression sweeps |
 
 ### Settings
@@ -131,13 +135,13 @@ python src/server.py --schema configs/lightspeed-mcp/schema.json --strategy stat
 python src/server.py \
   --schema configs/lightspeed-mcp/schema.json \
   --strategy fixtures \
-  --fixtures configs/lightspeed-mcp/fixtures.json
+  --fixtures configs/lightspeed-mcp/fixtures-cve-validation.json
 
 # HTTP transport (exposes JSON-RPC at POST /mcp)
 python src/server.py \
   --schema configs/lightspeed-mcp/schema.json \
   --strategy fixtures \
-  --fixtures configs/lightspeed-mcp/fixtures.json \
+  --fixtures configs/lightspeed-mcp/fixtures-cve-impact.json \
   --transport streamable-http --port 8080
 ```
 
@@ -154,10 +158,12 @@ HTTP transport (default):
 ```bash
 podman run --rm -d -p 8080:8080 \
   -v ./configs/<mcp-name>/schema.json:/config/schema.json:ro,Z \
-  -v ./configs/<mcp-name>/fixtures.json:/config/fixtures.json:ro,Z \
+  -v ./configs/<mcp-name>/fixtures-<scenario>.json:/config/fixtures.json:ro,Z \
   -e MOCK_STRATEGY=fixtures \
   mock-mcp-server:latest
 ```
+
+Mount the scenario file to `/config/fixtures.json` inside the container (the default `MOCK_FIXTURES_PATH`).
 
 stdio transport (for local MCP clients like Claude Code):
 
@@ -166,7 +172,7 @@ podman run --rm -i \
   -e MOCK_TRANSPORT=stdio \
   -e MOCK_STRATEGY=fixtures \
   -v ./configs/<mcp-name>/schema.json:/config/schema.json:ro,Z \
-  -v ./configs/<mcp-name>/fixtures.json:/config/fixtures.json:ro,Z \
+  -v ./configs/<mcp-name>/fixtures-<scenario>.json:/config/fixtures.json:ro,Z \
   mock-mcp-server:latest
 ```
 
@@ -243,7 +249,7 @@ python tests/test_mock.py
 ## Adding a new MCP config
 
 1. Create `configs/<mcp-name>/schema.json` with all tools from the real MCP server.
-2. Optionally create `configs/<mcp-name>/fixtures.json` with a coherent multi-step scenario.
+2. Optionally create `configs/<mcp-name>/fixtures-<scenario>.json` with a coherent multi-step scenario (one file per scenario).
 3. Optionally create `configs/<mcp-name>/USAGE.md` with curl commands that exercise the fixtures.
 4. Smoke test:
    ```bash
@@ -254,7 +260,7 @@ python tests/test_mock.py
 
 | Config | MCP server | Fixtures | Test guide |
 |---|---|---|---|
-| `configs/openshift-mcp-server/` | openshift-mcp-server | OOMKilled troubleshooting | — |
+| `configs/openshift-mcp-server/` | openshift-mcp-server | OOMKilled troubleshooting | [USAGE.md](configs/openshift-mcp-server/USAGE.md) |
 | `configs/lightspeed-mcp/` | lightspeed-mcp | CVE Impact Analysis, CVE Validation | [USAGE.md](configs/lightspeed-mcp/USAGE.md) |
 
 ## License

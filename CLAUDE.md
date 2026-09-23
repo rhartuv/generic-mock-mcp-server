@@ -31,7 +31,7 @@ The server is a single `server.py` that uses the MCP SDK (v2) to register tools 
 Two JSON files, bind-mounted into the container at `/config/`:
 
 - **`schema.json`** — tool definitions with `inputSchema`, `outputSchema`, and `outputExample` per tool.
-- **`fixtures.json`** — ordered sequence of tool responses for multi-step flows.
+- **`fixtures-<scenario>.json`** — ordered sequence of tool responses for one multi-step flow (one file per scenario).
 
 The image has no schemas baked in — you choose which files to mount. Pre-built configs for specific MCP servers live in `configs/`, one subdirectory per server.
 
@@ -55,12 +55,14 @@ generic-mock-mcp-server/
 │   └── fixtures.json      # Test fixture responses
 └── configs/               # Pre-built configs per MCP server
     ├── openshift-mcp-server/
-    │   ├── schema.json    # 20 tools (pods, nodes, resources, config)
-    │   └── fixtures.json  # OOMKilled troubleshooting scenario
+    │   ├── schema.json              # 20 tools (pods, nodes, resources, config)
+    │   ├── fixtures-oomkilled.json  # OOMKilled troubleshooting scenario
+    │   └── USAGE.md                 # Deploy & curl test guide
     └── lightspeed-mcp/
-        ├── schema.json    # 13 tools (vulnerability, inventory, remediations)
-        ├── fixtures.json  # CVE Impact Analysis scenario (7 steps)
-        └── USAGE.md       # Curl test guide
+        ├── schema.json                    # Lightspeed MCP tool catalog
+        ├── fixtures-cve-impact.json       # CVE Impact Analysis scenario (7 steps)
+        ├── fixtures-cve-validation.json   # CVE Validation scenario (3 steps)
+        └── USAGE.md                       # Deploy & curl test guide
 ```
 
 ## Schema Format
@@ -89,7 +91,7 @@ MCP server developers publish a `schema.json` alongside their server:
 
 ## Fixtures Format
 
-Skill authors provide a `fixtures.json` for multi-step flows:
+Skill authors provide a fixtures file per scenario (e.g. `fixtures-oomkilled.json`):
 
 ```json
 {
@@ -127,7 +129,7 @@ podman build -t mock-mcp-server:latest -f Containerfile .
 # Run with a config
 podman run --rm -d -p 8080:8080 \
   -v ./configs/openshift-mcp-server/schema.json:/config/schema.json:ro,Z \
-  -v ./configs/openshift-mcp-server/fixtures.json:/config/fixtures.json:ro,Z \
+  -v ./configs/openshift-mcp-server/fixtures-oomkilled.json:/config/fixtures.json:ro,Z \
   -e MOCK_STRATEGY=fixtures \
   mock-mcp-server:latest
 ```
@@ -137,8 +139,9 @@ See `README.md` for full usage and curl test commands.
 ## Adding a New MCP Config
 
 1. Create `configs/<mcp-name>/schema.json` with all tools from the MCP server.
-2. Optionally create `configs/<mcp-name>/fixtures.json` with a coherent multi-step scenario.
-3. Test: `python src/server.py --schema configs/<mcp-name>/schema.json --strategy static`
+2. Optionally create `configs/<mcp-name>/fixtures-<scenario>.json` with a coherent multi-step scenario (one file per scenario).
+3. Optionally create `configs/<mcp-name>/USAGE.md` with curl commands that exercise the fixtures.
+4. Test: `python src/server.py --schema configs/<mcp-name>/schema.json --strategy static`
 
 ## Key Design Decisions
 
