@@ -197,7 +197,7 @@ Run in order against `fixtures-cve-impact.json` (not `fixtures-cve-validation.js
 |---|---|---|---|
 | 1 | `get_mcp_version` | `{}` | `{"version": "1.4.2", ...}` |
 | 2 | `vulnerability__get_cves` | `{"impact":"7,6","sort":"-cvss_score","advisory_available":"true"}` | 3 CVEs, highest CVSS 9.8 |
-| 3 | `vulnerability__get_cve` | `{"cve_id":"CVE-2026-31337"}` | OpenSSL RCE, CVSS 9.8, errata RHSA-2026:4501 |
+| 3 | `vulnerability__get_cve` | `{"cve_id":"CVE-2026-31337"}` | OpenSSL RCE, CVSS 9.8, `remediation`: 2, RHSA-2026:4501 |
 | 4 | `vulnerability__get_cve_systems` | `{"cve":"CVE-2026-31337"}` | 3 systems (2 prod, 1 staging) |
 | 5 | `inventory__get_host_details` | `{"host_id":"68ce32aa-..."}` | prod-webserver-01, RHEL 9.4 |
 | 6 | `inventory__get_host_details` | `{"host_id":"f7e8d9c0-..."}` | prod-api-03, RHEL 9.4 |

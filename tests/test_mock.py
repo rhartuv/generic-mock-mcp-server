@@ -196,6 +196,55 @@ def test_tool_execution():
     asyncio.run(run())
 
 
+def test_lightspeed_cve_schema_covers_fixtures():
+    """Smoke-check Lightspeed schema vs CVE skill contract and fixture files."""
+    config_dir = Path(__file__).resolve().parent.parent / "configs" / "lightspeed-mcp"
+    schema = json.loads((config_dir / "schema.json").read_text())
+    tools = {t["name"]: t for t in schema["tools"]}
+
+    get_cve = tools["vulnerability__get_cve"]
+    get_cve_props = get_cve["inputSchema"]["properties"]
+    assert "cve_id" in get_cve_props
+    assert "cve" not in get_cve_props
+
+    attrs = get_cve["outputSchema"]["properties"]["attributes"]["properties"]
+    for key in ("advisory_available", "remediation", "advisories_list", "rules"):
+        assert key in attrs, f"vulnerability__get_cve outputSchema missing {key}"
+        assert key in get_cve["outputExample"]["attributes"], (
+            f"vulnerability__get_cve outputExample missing {key}"
+        )
+    assert attrs["remediation"]["type"] == "integer"
+    assert get_cve["outputExample"]["attributes"]["remediation"] == 2
+
+    get_systems = tools["vulnerability__get_cve_systems"]
+    systems_props = get_systems["inputSchema"]["properties"]
+    assert "cve" in systems_props
+    assert "cve_id" not in systems_props
+
+    for fixtures_name in ("fixtures-cve-validation.json", "fixtures-cve-impact.json"):
+        fixtures = json.loads((config_dir / fixtures_name).read_text())
+        for step in fixtures["sequence"]:
+            tool_name = step["tool"]
+            assert tool_name in tools, f"{fixtures_name}: unknown tool {tool_name}"
+            input_props = tools[tool_name]["inputSchema"].get("properties") or {}
+            for key in step.get("input") or {}:
+                assert key in input_props, (
+                    f"{fixtures_name}: {tool_name} input {key!r} not in schema"
+                )
+            if tool_name == "vulnerability__get_cve":
+                output_attrs = (step.get("output") or {}).get("attributes") or {}
+                for key in output_attrs:
+                    assert key in attrs, (
+                        f"{fixtures_name}: get_cve output field {key!r} not in schema"
+                    )
+                if "remediation" in output_attrs:
+                    assert isinstance(output_attrs["remediation"], int), (
+                        f"{fixtures_name}: remediation must be an integer "
+                        "(2 = automated, 0 = not available)"
+                    )
+    print("PASS: lightspeed CVE schema covers fixtures and skill contract")
+
+
 if __name__ == "__main__":
     test_schema_loading()
     test_static_strategy()
@@ -205,4 +254,5 @@ if __name__ == "__main__":
     test_fixtures_exhaustion_falls_back()
     test_server_build()
     test_tool_execution()
+    test_lightspeed_cve_schema_covers_fixtures()
     print("\nAll tests passed.")
