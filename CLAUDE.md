@@ -37,8 +37,8 @@ The image has no schemas baked in — you choose which files to mount. Pre-built
 
 ### Transport
 
-- **HTTP** (default): Streamable HTTP on port 8080, exposes JSON-RPC at `POST /mcp`. Designed for pipeline sidecar deployments.
-- **stdio**: For local MCP clients (Claude Code, IDEs). Set `MOCK_TRANSPORT=stdio`.
+- **CLI default is `stdio`**: for local MCP clients (Claude Code, IDEs).
+- **Container default is `streamable-http`**: Streamable HTTP on port 8080, JSON-RPC at `POST /mcp`, for pipeline sidecar deployments.
 
 ## Repository Structure
 
@@ -106,16 +106,16 @@ When ``input`` is present, the mock matches tool name plus those arguments (extr
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `MOCK_SCHEMA_PATH` | `/config/schema.json` | Path to tool schema |
-| `MOCK_FIXTURES_PATH` | `/config/fixtures.json` | Path to fixtures |
-| `MOCK_STRATEGY` | `fixtures` | `static`, `fixtures`, or `llm` |
-| `MOCK_TRANSPORT` | `streamable-http` | `stdio` or `streamable-http` |
-| `MOCK_PORT` | `8080` | Port for HTTP transport |
-| `MOCK_LLM_MODEL` | `claude-haiku-4-5-20251001` | Model for LLM strategy |
+CLI flags override env vars. Values below are **container image** defaults (`Containerfile` `ENV`). Running `python src/server.py` with no env uses different CLI defaults: `--strategy static`, `--transport stdio`, and `--schema` / `--fixtures` are required.
 
-CLI flags override env vars.
+| Variable | CLI default | Container default | Description |
+|---|---|---|---|
+| `MOCK_SCHEMA_PATH` | required | `/config/schema.json` | Path to tool schema |
+| `MOCK_FIXTURES_PATH` | required for `fixtures` | `/config/fixtures.json` | Path to fixtures |
+| `MOCK_STRATEGY` | `static` | `fixtures` | `static`, `fixtures`, or `llm` |
+| `MOCK_TRANSPORT` | `stdio` | `streamable-http` | `stdio` or `streamable-http` |
+| `MOCK_PORT` | `8080` | `8080` | Port for HTTP transport |
+| `MOCK_LLM_MODEL` | `claude-haiku-4-5-20251001` | `claude-haiku-4-5-20251001` | Model for LLM strategy |
 
 ## Development
 

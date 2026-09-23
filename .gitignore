@@ -1,5 +1,9 @@
 .mcp.json
 .claude/skills/
 .claude/settings.local.json
+.venv/
+venv/
+.env
 __pycache__/
 *.pyc
+*.egg-info/

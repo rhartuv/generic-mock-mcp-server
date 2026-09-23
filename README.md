@@ -13,7 +13,7 @@ AI skills depend on MCP servers for tool access. Evaluating skills end-to-end re
 - Dynamic tool registration from any `schema.json`
 - Three response strategies: static, fixtures, and LLM-generated
 - Streamable HTTP and stdio transports
-- Session-aware fixture sequencing with automatic fallback
+- Fixture matching with automatic fallback to schema examples
 - Container-ready (UBI 10 minimal, non-root, ~50MB)
 
 ## Project structure
@@ -112,16 +112,16 @@ When a fixture includes ``input``, the mock matches **tool name + those argument
 
 ### Settings
 
-All settings can be passed as CLI flags (which take precedence) or environment variables.
+CLI flags override environment variables. **CLI defaults** apply when you run `python src/server.py` with no env vars. The **Containerfile** sets env vars so the image starts ready for sidecar/eval use.
 
-| Variable | CLI flag | Default | Description |
-|---|---|---|---|
-| `MOCK_SCHEMA_PATH` | `--schema` | — | Path to tool schema (required) |
-| `MOCK_FIXTURES_PATH` | `--fixtures` | — | Path to fixtures file |
-| `MOCK_STRATEGY` | `--strategy` | `static` | `static`, `fixtures`, or `llm` |
-| `MOCK_TRANSPORT` | `--transport` | `stdio` | `stdio` or `streamable-http` |
-| `MOCK_PORT` | `--port` | `8080` | Port for HTTP transport |
-| `MOCK_LLM_MODEL` | `--llm-model` | `claude-haiku-4-5-20251001` | Model for LLM strategy |
+| Variable | CLI flag | CLI default | Container default | Description |
+|---|---|---|---|---|
+| `MOCK_SCHEMA_PATH` | `--schema` | required | `/config/schema.json` | Path to tool schema |
+| `MOCK_FIXTURES_PATH` | `--fixtures` | required for `fixtures` | `/config/fixtures.json` | Path to fixtures file |
+| `MOCK_STRATEGY` | `--strategy` | `static` | `fixtures` | `static`, `fixtures`, or `llm` |
+| `MOCK_TRANSPORT` | `--transport` | `stdio` | `streamable-http` | `stdio` or `streamable-http` |
+| `MOCK_PORT` | `--port` | `8080` | `8080` | Port for HTTP transport |
+| `MOCK_LLM_MODEL` | `--llm-model` | `claude-haiku-4-5-20251001` | `claude-haiku-4-5-20251001` | Model for LLM strategy |
 
 ## Usage
 
@@ -153,7 +153,7 @@ Build:
 podman build -t mock-mcp-server:latest -f Containerfile .
 ```
 
-HTTP transport (default):
+HTTP transport (container default):
 
 ```bash
 podman run --rm -d -p 8080:8080 \
@@ -178,14 +178,14 @@ podman run --rm -i \
 
 ## Testing with curl
 
-The MCP protocol requires a session handshake before tool calls. The server exposes JSON-RPC at `POST /mcp`.
+The MCP protocol requires a session handshake before tool calls. The server exposes JSON-RPC at `POST /mcp`. Streamable HTTP responses are SSE (`event: message`); do not pipe them to `python3 -m json.tool`.
 
 ### 1. Initialize and capture session ID
 
 ```bash
 SESSION=$(curl -s -D- -X POST http://127.0.0.1:8080/mcp \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
     "method": "initialize",
@@ -205,7 +205,7 @@ echo "Session: $SESSION"
 ```bash
 curl -s -X POST http://127.0.0.1:8080/mcp \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "Mcp-Session-Id: $SESSION" \
   -d '{"jsonrpc": "2.0", "method": "notifications/initialized"}'
 ```
@@ -215,9 +215,9 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
 ```bash
 curl -s -X POST http://127.0.0.1:8080/mcp \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "Mcp-Session-Id: $SESSION" \
-  -d '{"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 2}' | python3 -m json.tool
+  -d '{"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 2}'
 ```
 
 ### 4. Call a tool
@@ -225,7 +225,7 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
 ```bash
 curl -s -X POST http://127.0.0.1:8080/mcp \
   -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
+  -H "Accept: application/json, text/event-stream" \
   -H "Mcp-Session-Id: $SESSION" \
   -d '{
     "jsonrpc": "2.0",
@@ -235,7 +235,7 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
       "arguments": {}
     },
     "id": 3
-  }' | python3 -m json.tool
+  }'
 ```
 
 For MCP-specific curl test guides with complete step-by-step commands, see the `USAGE.md` inside each `configs/<mcp-name>/` directory.
