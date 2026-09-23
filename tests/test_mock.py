@@ -245,6 +245,96 @@ def test_lightspeed_cve_schema_covers_fixtures():
     print("PASS: lightspeed CVE schema covers fixtures and skill contract")
 
 
+def test_missing_and_invalid_config():
+    import io
+    import tempfile
+    from server import ConfigError, load_fixtures, load_schema, main, warn_unknown_fixture_tools
+
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_path = Path(tmp)
+        missing = tmp_path / "missing.json"
+
+        try:
+            load_schema(missing)
+            raise AssertionError("expected ConfigError for missing schema")
+        except ConfigError as exc:
+            assert "schema not found" in str(exc)
+
+        try:
+            load_fixtures(missing)
+            raise AssertionError("expected ConfigError for missing fixtures")
+        except ConfigError as err:
+            assert "fixtures not found" in str(err)
+
+        invalid = tmp_path / "invalid.json"
+        invalid.write_text("{not-json", encoding="utf-8")
+        try:
+            load_schema(invalid)
+            raise AssertionError("expected ConfigError for invalid schema JSON")
+        except ConfigError as exc:
+            assert "invalid JSON" in str(exc)
+
+        try:
+            load_fixtures(invalid)
+            raise AssertionError("expected ConfigError for invalid fixtures JSON")
+        except ConfigError as exc:
+            assert "invalid JSON" in str(exc)
+
+        no_tools = tmp_path / "no-tools.json"
+        no_tools.write_text('{"name": "x"}', encoding="utf-8")
+        try:
+            load_schema(no_tools)
+            raise AssertionError("expected ConfigError for schema without tools")
+        except ConfigError as exc:
+            assert "tools" in str(exc)
+
+        no_sequence = tmp_path / "no-sequence.json"
+        no_sequence.write_text('{"description": "x"}', encoding="utf-8")
+        try:
+            load_fixtures(no_sequence)
+            raise AssertionError("expected ConfigError for fixtures without sequence")
+        except ConfigError as exc:
+            assert "sequence" in str(exc)
+
+        argv = sys.argv
+        stderr = sys.stderr
+        buf = io.StringIO()
+        sys.argv = ["server.py", "--schema", str(missing)]
+        sys.stderr = buf
+        try:
+            try:
+                main()
+            except SystemExit as exc:
+                assert exc.code == 1
+            else:
+                raise AssertionError("main() should exit on missing schema")
+        finally:
+            sys.argv = argv
+            sys.stderr = stderr
+        assert buf.getvalue().startswith("ERROR:")
+
+    import logging
+    warnings: list[str] = []
+
+    class Capture(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            if record.levelno >= logging.WARNING:
+                warnings.append(record.getMessage())
+
+    log = logging.getLogger("server")
+    handler = Capture()
+    log.addHandler(handler)
+    try:
+        warn_unknown_fixture_tools(
+            {"tools": [{"name": "known"}]},
+            [{"tool": "unknown_tool", "input": {}, "output": {}}],
+        )
+    finally:
+        log.removeHandler(handler)
+    assert any("unknown_tool" in message for message in warnings)
+    print("PASS: missing/invalid schema and fixtures fail fast")
+
+
 if __name__ == "__main__":
     test_schema_loading()
     test_static_strategy()
@@ -255,4 +345,5 @@ if __name__ == "__main__":
     test_server_build()
     test_tool_execution()
     test_lightspeed_cve_schema_covers_fixtures()
+    test_missing_and_invalid_config()
     print("\nAll tests passed.")

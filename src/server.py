@@ -43,6 +43,63 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class ConfigError(Exception):
+    """Invalid schema or fixtures; main() prints the message and exits 1."""
+
+
+def load_json_file(path: Path, kind: str) -> Any:
+    """Load JSON or raise ConfigError (missing file / invalid JSON)."""
+    if not path.exists():
+        raise ConfigError(f"{kind} not found: {path}")
+    if not path.is_file():
+        raise ConfigError(f"{kind} is not a file: {path}")
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except json.JSONDecodeError as exc:
+        raise ConfigError(f"invalid JSON in {kind} {path}: {exc}") from exc
+    except OSError as exc:
+        raise ConfigError(f"cannot read {kind} {path}: {exc}") from exc
+
+
+def load_schema(schema_path: Path) -> dict:
+    data = load_json_file(schema_path, "schema")
+    if not isinstance(data, dict):
+        raise ConfigError(f"schema must be a JSON object: {schema_path}")
+    tools = data.get("tools")
+    if not isinstance(tools, list):
+        raise ConfigError(f"schema missing a 'tools' list: {schema_path}")
+    for index, tool in enumerate(tools):
+        if not isinstance(tool, dict) or not tool.get("name"):
+            raise ConfigError(
+                f"schema tools[{index}] must be an object with 'name': {schema_path}"
+            )
+    return data
+
+
+def load_fixtures(fixtures_path: Path) -> dict:
+    data = load_json_file(fixtures_path, "fixtures")
+    if not isinstance(data, dict):
+        raise ConfigError(f"fixtures must be a JSON object: {fixtures_path}")
+    sequence = data.get("sequence")
+    if not isinstance(sequence, list):
+        raise ConfigError(f"fixtures missing a 'sequence' list: {fixtures_path}")
+    return data
+
+
+def warn_unknown_fixture_tools(schema: dict, sequence: list) -> None:
+    registered = {tool.get("name") for tool in schema.get("tools", [])}
+    warned: set[str] = set()
+    for fixture in sequence:
+        if not isinstance(fixture, dict):
+            continue
+        tool_name = fixture.get("tool")
+        if not tool_name or tool_name in registered or tool_name in warned:
+            continue
+        warned.add(tool_name)
+        logger.warning("fixture tool %r is not in the schema", tool_name)
+
+
 class ResponseStrategy(ABC):
     """Base class for response generation strategies."""
 
@@ -97,10 +154,12 @@ class FixturesStrategy(ResponseStrategy):
     """
 
     def __init__(self, fixtures_path: Path):
-        with open(fixtures_path) as f:
-            data = json.load(f)
-        self._sequence = data.get("sequence", [])
+        data = load_fixtures(fixtures_path)
+        self._sequence = data["sequence"]
         self._used: set[int] = set()
+
+    def warn_unknown_tools(self, schema: dict) -> None:
+        warn_unknown_fixture_tools(schema, self._sequence)
 
     def generate(self, tool_name: str, tool_schema: dict, arguments: dict[str, Any]) -> str:
         for index, fixture in enumerate(self._sequence):
@@ -190,11 +249,6 @@ Rules:
         })
 
         return response_text
-
-
-def load_schema(schema_path: Path) -> dict:
-    with open(schema_path) as f:
-        return json.load(f)
 
 
 def create_tool_handler(tool_def: dict, strategy: ResponseStrategy):
@@ -314,19 +368,24 @@ def main():
         print("ERROR: --schema or MOCK_SCHEMA_PATH is required", file=sys.stderr)
         sys.exit(1)
 
-    schema = load_schema(Path(args.schema))
+    try:
+        schema = load_schema(Path(args.schema))
 
-    if args.strategy == "static":
-        strategy = StaticStrategy()
-    elif args.strategy == "fixtures":
-        if not args.fixtures:
-            print("ERROR: --fixtures required for fixtures strategy", file=sys.stderr)
-            sys.exit(1)
-        strategy = FixturesStrategy(Path(args.fixtures))
-    elif args.strategy == "llm":
-        strategy = LLMStrategy(model=args.llm_model, api_key=args.llm_api_key)
-    else:
-        strategy = StaticStrategy()
+        if args.strategy == "static":
+            strategy = StaticStrategy()
+        elif args.strategy == "fixtures":
+            if not args.fixtures:
+                print("ERROR: --fixtures required for fixtures strategy", file=sys.stderr)
+                sys.exit(1)
+            strategy = FixturesStrategy(Path(args.fixtures))
+            strategy.warn_unknown_tools(schema)
+        elif args.strategy == "llm":
+            strategy = LLMStrategy(model=args.llm_model, api_key=args.llm_api_key)
+        else:
+            strategy = StaticStrategy()
+    except ConfigError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     mcp = build_server(schema, strategy, transport=args.transport)
 
