@@ -89,8 +89,8 @@
       },
       "outputExample": {
         "events": [
-          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.event1", "type": "Warning", "reason": "OOMKilled", "message": "Container api-server exceeded memory limit", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T10:15:00Z"},
-          {"namespace": "openshift-monitoring", "name": "prometheus-k8s-0.event1", "type": "Normal", "reason": "Pulled", "message": "Successfully pulled image", "object": "Pod/prometheus-k8s-0", "last_seen": "2026-09-07T09:00:00Z"}
+          {"namespace": "myapp", "name": "api-server-7d4b8c6f9-x2k1p.event1", "type": "Normal", "reason": "Pulled", "message": "Successfully pulled image", "object": "Pod/api-server-7d4b8c6f9-x2k1p", "last_seen": "2026-09-07T09:00:00Z"},
+          {"namespace": "openshift-monitoring", "name": "prometheus-k8s-0.event1", "type": "Normal", "reason": "Started", "message": "Started container prometheus", "object": "Pod/prometheus-k8s-0", "last_seen": "2026-09-07T09:00:00Z"}
         ]
       }
     },
@@ -151,7 +151,7 @@
       "outputExample": {
         "node": "worker-0.ocp-lab.example.com",
         "query": "kubelet",
-        "logs": "Sep 07 10:14:58 worker-0 kubelet[1523]: I0907 10:14:58.123456 1523 kubelet.go:2345] SyncLoop (PLEG): event for pod \"myapp/api-server-7d4b8c6f9-x2k1p\"\nSep 07 10:15:00 worker-0 kubelet[1523]: W0907 10:15:00.234567 1523 oom_linux.go:67] Container api-server in pod api-server-7d4b8c6f9-x2k1p exceeded memory limit\n"
+        "logs": "Sep 07 09:00:01 worker-0 kubelet[1523]: I0907 09:00:01.123456 1523 kubelet.go:2345] SyncLoop (PLEG): \"myapp/api-server-7d4b8c6f9-x2k1p\" in running state\nSep 07 09:00:02 worker-0 kubelet[1523]: I0907 09:00:02.234567 1523 kubelet.go:2401] SyncLoop (SYNC): 12 pods, 12 running\n"
       }
     },
     {
@@ -214,8 +214,8 @@
       "outputExample": {
         "nodes": [
           {"name": "master-0.ocp-lab.example.com", "cpu_usage": "850m", "cpu_percent": "21%", "memory_usage": "6144Mi", "memory_percent": "48%"},
-          {"name": "worker-0.ocp-lab.example.com", "cpu_usage": "2100m", "cpu_percent": "52%", "memory_usage": "24Gi", "memory_percent": "75%"},
-          {"name": "worker-1.ocp-lab.example.com", "cpu_usage": "1400m", "cpu_percent": "35%", "memory_usage": "18Gi", "memory_percent": "56%"}
+          {"name": "worker-0.ocp-lab.example.com", "cpu_usage": "1600m", "cpu_percent": "40%", "memory_usage": "16Gi", "memory_percent": "50%"},
+          {"name": "worker-1.ocp-lab.example.com", "cpu_usage": "1400m", "cpu_percent": "35%", "memory_usage": "14Gi", "memory_percent": "44%"}
         ]
       }
     },
@@ -354,7 +354,7 @@
       },
       "outputExample": {
         "pods": [
-          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "2h"},
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "5d"},
           {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
           {"name": "prometheus-k8s-0", "namespace": "openshift-monitoring", "status": "Running", "ready": "3/3", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
         ]
@@ -394,7 +394,8 @@
       },
       "outputExample": {
         "pods": [
-          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "CrashLoopBackOff", "ready": "0/1", "restarts": 5, "node": "worker-0.ocp-lab.example.com", "age": "2h"},
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "5d"},
+          {"name": "api-server-7d4b8c6f9-m9n3q", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
           {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-1.ocp-lab.example.com", "age": "5d"},
           {"name": "db-postgresql-0", "namespace": "myapp", "status": "Running", "ready": "1/1", "restarts": 0, "node": "worker-0.ocp-lab.example.com", "age": "30d"}
         ]
@@ -489,9 +490,9 @@
       },
       "outputExample": {
         "pods": [
-          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "cpu_usage": "450m", "memory_usage": "512Mi"},
-          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "cpu_usage": "120m", "memory_usage": "256Mi"},
-          {"name": "db-postgresql-0", "namespace": "myapp", "cpu_usage": "200m", "memory_usage": "1Gi"}
+          {"name": "api-server-7d4b8c6f9-x2k1p", "namespace": "myapp", "cpu_usage": "180m", "memory_usage": "220Mi"},
+          {"name": "web-frontend-5b9c7d8e4f-abc12", "namespace": "myapp", "cpu_usage": "80m", "memory_usage": "128Mi"},
+          {"name": "db-postgresql-0", "namespace": "myapp", "cpu_usage": "150m", "memory_usage": "768Mi"}
         ]
       }
     },
@@ -579,8 +580,8 @@
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {"name": "api-server", "namespace": "myapp", "labels": {"app": "api-server"}},
-        "spec": {"replicas": 2, "selector": {"matchLabels": {"app": "api-server"}}, "template": {"spec": {"containers": [{"name": "api-server", "image": "registry.example.com/myapp/api-server:v2.3.1", "resources": {"limits": {"memory": "512Mi", "cpu": "500m"}, "requests": {"memory": "256Mi", "cpu": "250m"}}}]}}},
-        "status": {"replicas": 2, "readyReplicas": 1, "availableReplicas": 1, "conditions": [{"type": "Available", "status": "True"}]}
+        "spec": {"replicas": 2, "selector": {"matchLabels": {"app": "api-server"}}, "template": {"spec": {"containers": [{"name": "api-server", "image": "registry.example.com/myapp/api-server:v2.3.1", "resources": {"limits": {"memory": "1Gi", "cpu": "500m"}, "requests": {"memory": "256Mi", "cpu": "250m"}}}]}}},
+        "status": {"replicas": 2, "readyReplicas": 2, "availableReplicas": 2, "conditions": [{"type": "Available", "status": "True"}]}
       }
     },
     {
@@ -617,7 +618,7 @@
       },
       "outputExample": {
         "items": [
-          {"name": "api-server", "namespace": "myapp", "kind": "Deployment", "status": "1/2", "age": "5d"},
+          {"name": "api-server", "namespace": "myapp", "kind": "Deployment", "status": "2/2", "age": "5d"},
           {"name": "web-frontend", "namespace": "myapp", "kind": "Deployment", "status": "1/1", "age": "30d"}
         ]
       }

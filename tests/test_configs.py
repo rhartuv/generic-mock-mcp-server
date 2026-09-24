@@ -1,5 +1,6 @@
 """Smoke tests for shipped configs and the Lightspeed CVE skill contract."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -75,3 +76,23 @@ def test_get_cve_skill_fields_are_in_schema_and_example():
     get_systems = tools["vulnerability__get_cve_systems"]
     assert "cve" in get_systems["inputSchema"]["properties"]
     assert "cve_id" not in get_systems["inputSchema"]["properties"]
+
+
+OOM_STORY_MARKERS = ("OOMKilled", "OOMKilling", "CrashLoopBackOff", "oom_linux")
+
+
+def test_openshift_schema_examples_are_healthy():
+    schema = load_schema(CONFIGS / "openshift-mcp-server" / "schema.json")
+    for tool in schema["tools"]:
+        blob = json.dumps(tool.get("outputExample"))
+        for marker in OOM_STORY_MARKERS:
+            assert marker not in blob, (
+                f"{tool['name']} outputExample still contains {marker!r}"
+            )
+
+
+def test_oomkilled_story_lives_in_fixtures_only():
+    fixtures = load_fixtures(CONFIGS / "openshift-mcp-server" / "fixtures-oomkilled.json")
+    blob = json.dumps(fixtures)
+    assert "OOMKilled" in blob
+    assert "CrashLoopBackOff" in blob

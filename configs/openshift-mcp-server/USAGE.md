@@ -8,6 +8,8 @@ How to deploy the mock server for the OpenShift MCP Server and test it with curl
 |---|---|---|
 | `fixtures-oomkilled.json` | 12 | Pod in CrashLoopBackOff due to OOMKilled in namespace `myapp`: diagnose, fix memory limits, verify |
 
+Schema `outputExample` values describe a healthy cluster. The OOMKilled story is only in the fixtures file above; static strategy will not look like a broken cluster.
+
 ## 1. Build the container image
 
 From the repo root:
@@ -154,7 +156,7 @@ curl -s -X POST http://127.0.0.1:8080/mcp \
 
 ### OOMKilled troubleshooting — full fixture sequence
 
-Run in order against `fixtures-oomkilled.json`:
+Run in order against `fixtures-oomkilled.json` (not against schema `outputExample`). Schema examples are a **healthy** cluster; the CrashLoopBackOff / OOMKilled narrative exists only in this fixtures file.
 
 | Step | Tool | Arguments (summary) | Expected result |
 |---|---|---|---|
@@ -175,7 +177,7 @@ Fixtures are matched by **tool name and `input`**. Empty `input` (`{}`) matches 
 
 ### Fixture exhaustion
 
-After all fixtures for a tool are consumed, subsequent calls fall back to the `outputExample` from the schema.
+After all fixtures for a tool are consumed, subsequent calls fall back to the `outputExample` from the schema. That fallback is a healthy/generic cluster (Running pods, Normal events), not the OOMKilled story.
 
 ## Troubleshooting
 
