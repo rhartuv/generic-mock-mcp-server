@@ -305,7 +305,7 @@ def create_tool_handler(tool_def: dict, strategy: ResponseStrategy):
     return handler
 
 
-def build_server(schema: dict, strategy: ResponseStrategy, transport: str = "stdio") -> FastMCP:
+def build_server(schema: dict, strategy: ResponseStrategy) -> FastMCP:
     server_name = schema.get("name", "mock-mcp-server")
 
     mcp = FastMCP(server_name)
@@ -387,7 +387,7 @@ def main():
         print(f"ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
 
-    mcp = build_server(schema, strategy, transport=args.transport)
+    mcp = build_server(schema, strategy)
 
     kwargs = {}
     if args.transport == "streamable-http":

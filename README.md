@@ -23,10 +23,10 @@ AI skills depend on MCP servers for tool access. Evaluating skills end-to-end re
 ├── README.md
 ├── Containerfile
 ├── requirements.txt
+├── requirements-dev.txt
 ├── src/
 │   └── server.py              # Mock server implementation
-├── tests/
-│   ├── test_mock.py            # Unit tests
+├── tests/                      # pytest: engine, configs, LLM
 │   ├── schema.json             # Test fixture schema
 │   └── fixtures.json           # Test fixture responses
 └── configs/                    # Pre-built MCP configs
@@ -243,7 +243,8 @@ For MCP-specific curl test guides with complete step-by-step commands, see the `
 ## Running tests
 
 ```bash
-python tests/test_mock.py
+pip install -r requirements-dev.txt
+pytest
 ```
 
 ## Adding a new MCP config

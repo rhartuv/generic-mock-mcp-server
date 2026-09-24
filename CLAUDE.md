@@ -47,10 +47,10 @@ generic-mock-mcp-server/
 ├── README.md              # Project documentation
 ├── Containerfile          # UBI 10 minimal + Python 3.12, non-root
 ├── requirements.txt       # mcp SDK, anthropic (for LLM strategy)
+├── requirements-dev.txt   # pytest
 ├── src/
 │   └── server.py          # Mock server (strategies, dynamic tool registration)
-├── tests/
-│   ├── test_mock.py       # Unit tests (schema loading, strategies, MCP execution)
+├── tests/                 # pytest: engine, configs, LLM fake client
 │   ├── schema.json        # Test fixture schema (4 tools)
 │   └── fixtures.json      # Test fixture responses
 └── configs/               # Pre-built configs per MCP server
@@ -121,7 +121,8 @@ CLI flags override env vars. Values below are **container image** defaults (`Con
 
 ```bash
 # Run tests (no container needed)
-python tests/test_mock.py
+pip install -r requirements-dev.txt
+pytest
 
 # Build image
 podman build -t mock-mcp-server:latest -f Containerfile .
