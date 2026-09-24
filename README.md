@@ -10,7 +10,7 @@ AI skills depend on MCP servers for tool access. Evaluating skills end-to-end re
 
 ## Features
 
-- Dynamic tool registration from any `schema.json`
+- Dynamic tool registration from any `schema.json` ([SCHEMA.md](SCHEMA.md) contract)
 - Three response strategies: static, fixtures, and LLM-generated
 - Streamable HTTP and stdio transports
 - Fixture matching with automatic fallback to schema examples
@@ -21,6 +21,7 @@ AI skills depend on MCP servers for tool access. Evaluating skills end-to-end re
 ```
 .
 ├── README.md
+├── SCHEMA.md                   # schema.json / fixtures contract
 ├── Containerfile
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -54,53 +55,16 @@ pip install -r requirements.txt
 
 ## Configuration
 
-The server requires one or two JSON files:
+The server requires one or two JSON files. **MCP developers** publish `schema.json`; **skill authors** publish one `fixtures-<scenario>.json` per evaluation flow. The full field contract, `outputExample` rules, a minimal example, and checklists are in **[SCHEMA.md](SCHEMA.md)**.
 
-| File | Required | Purpose |
-|---|---|---|
-| `schema.json` | Yes | Tool definitions (name, description, inputSchema, outputSchema, outputExample) |
-| `fixtures-<scenario>.json` | For `fixtures` strategy | Ordered sequence of tool responses for one multi-step scenario |
+| File | Required | Owner | Purpose |
+|---|---|---|---|
+| `schema.json` | Yes | MCP developers | Tool catalog (`name`, `description`, `inputSchema`, `outputSchema`, `outputExample`) |
+| `fixtures-<scenario>.json` | For `fixtures` strategy | Skill authors | Ordered sequence of tool responses for one multi-step scenario |
 
 Name each fixtures file after the scenario (e.g. `fixtures-cve-validation.json`, `fixtures-oomkilled.json`). When mounting into the container, map it to `/config/fixtures.json`.
 
-### Schema format
-
-MCP server developers publish a `schema.json` alongside their server:
-
-```json
-{
-  "name": "my-mcp-server",
-  "version": "1.0.0",
-  "tools": [
-    {
-      "name": "tool_name",
-      "description": "What the tool does",
-      "inputSchema": {
-        "type": "object",
-        "properties": { ... },
-        "required": [...]
-      },
-      "outputSchema": { ... },
-      "outputExample": { ... }
-    }
-  ]
-}
-```
-
-### Fixtures format
-
-Skill authors provide a fixtures file per scenario (recommended name: `fixtures-<scenario>.json`):
-
-```json
-{
-  "sequence": [
-    {"tool": "tool_a", "input": {...}, "output": {...}},
-    {"tool": "tool_b", "input": {...}, "output": {...}}
-  ]
-}
-```
-
-When a fixture includes ``input``, the mock matches **tool name + those argument values** (extra call arguments are ignored). Empty ``input`` (`{}`) matches any arguments for that tool, in file order. If no unused fixture matches, a warning is logged and the schema ``outputExample`` is used — the mock does not silently return the next tool's canned payload.
+When a fixture includes `input`, the mock matches **tool name + those argument values** (extra call arguments are ignored). Empty `input` (`{}`) matches any arguments for that tool, in file order. If no unused fixture matches, a warning is logged and the schema `outputExample` is used — the mock does not silently return the next tool's canned payload.
 
 ### Response strategies
 
@@ -248,6 +212,8 @@ pytest
 ```
 
 ## Adding a new MCP config
+
+Follow **[SCHEMA.md](SCHEMA.md)** for required fields, `outputExample` rules, and the author checklists.
 
 1. Create `configs/<mcp-name>/schema.json` with all tools from the real MCP server.
 2. Optionally create `configs/<mcp-name>/fixtures-<scenario>.json` with a coherent multi-step scenario (one file per scenario).

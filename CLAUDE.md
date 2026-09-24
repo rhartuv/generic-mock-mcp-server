@@ -28,10 +28,10 @@ The server is a single `server.py` that uses the MCP SDK (v2) to register tools 
 
 ### Configuration
 
-Two JSON files, bind-mounted into the container at `/config/`:
+Two JSON files, bind-mounted into the container at `/config/`. Field-level contract: **[SCHEMA.md](SCHEMA.md)**.
 
-- **`schema.json`** — tool definitions with `inputSchema`, `outputSchema`, and `outputExample` per tool.
-- **`fixtures-<scenario>.json`** — ordered sequence of tool responses for one multi-step flow (one file per scenario).
+- **`schema.json`** — tool definitions with `inputSchema`, `outputSchema`, and `outputExample` per tool (MCP developers own this file).
+- **`fixtures-<scenario>.json`** — ordered sequence of tool responses for one multi-step flow (skill authors own this file; one file per scenario).
 
 The image has no schemas baked in — you choose which files to mount. Pre-built configs for specific MCP servers live in `configs/`, one subdirectory per server.
 
@@ -45,6 +45,7 @@ The image has no schemas baked in — you choose which files to mount. Pre-built
 ```
 generic-mock-mcp-server/
 ├── README.md              # Project documentation
+├── SCHEMA.md              # schema.json / fixtures contract for MCP developers
 ├── Containerfile          # UBI 10 minimal + Python 3.12, non-root
 ├── requirements.txt       # mcp SDK, anthropic (for LLM strategy)
 ├── requirements-dev.txt   # pytest
@@ -65,44 +66,11 @@ generic-mock-mcp-server/
         └── USAGE.md                       # Deploy & curl test guide
 ```
 
-## Schema Format
+## Schema and fixtures
 
-MCP server developers publish a `schema.json` alongside their server:
+The standalone contract is **[SCHEMA.md](SCHEMA.md)**. MCP developers publish and maintain `schema.json` (`name`, `description`, `inputSchema`, `outputSchema`, `outputExample` per tool). Skill authors publish `fixtures-<scenario>.json` (one file per evaluation flow). Do not invent extra schema fields or auto-generate from OpenAPI/Compass unless a later ticket asks for it.
 
-```json
-{
-  "name": "my-mcp-server",
-  "version": "1.0.0",
-  "tools": [
-    {
-      "name": "tool_name",
-      "description": "What the tool does",
-      "inputSchema": {
-        "type": "object",
-        "properties": { ... },
-        "required": [...]
-      },
-      "outputSchema": { ... },
-      "outputExample": { ... }
-    }
-  ]
-}
-```
-
-## Fixtures Format
-
-Skill authors provide a fixtures file per scenario (e.g. `fixtures-oomkilled.json`):
-
-```json
-{
-  "sequence": [
-    {"tool": "tool_a", "input": {...}, "output": {...}},
-    {"tool": "tool_b", "input": {...}, "output": {...}}
-  ]
-}
-```
-
-When ``input`` is present, the mock matches tool name plus those arguments (extra call args are ignored). Empty ``input`` matches any arguments. If nothing matches, a warning is logged and the schema ``outputExample`` is returned.
+When `input` is present, the mock matches tool name plus those arguments (extra call args are ignored). Empty `input` matches any arguments. If nothing matches, a warning is logged and the schema `outputExample` is returned.
 
 ## Environment Variables
 
@@ -139,6 +107,8 @@ See `README.md` for full usage and curl test commands.
 
 ## Adding a New MCP Config
 
+Follow **[SCHEMA.md](SCHEMA.md)** (required fields, `outputExample` rules, checklists).
+
 1. Create `configs/<mcp-name>/schema.json` with all tools from the MCP server.
 2. Optionally create `configs/<mcp-name>/fixtures-<scenario>.json` with a coherent multi-step scenario (one file per scenario).
 3. Optionally create `configs/<mcp-name>/USAGE.md` with curl commands that exercise the fixtures.
@@ -146,7 +116,7 @@ See `README.md` for full usage and curl test commands.
 
 ## Key Design Decisions
 
-- **Schema ownership**: The MCP server developer publishes and maintains `schema.json`. It is the contract between the MCP, the skills that use it, and the mock.
+- **Schema ownership**: The MCP server developer publishes and maintains `schema.json` (see [SCHEMA.md](SCHEMA.md)). It is the contract between the MCP, the skills that use it, and the mock. Skill authors publish scenario fixtures.
 - **Fixtures for certification, LLM for exploration**: Fixtures give deterministic pass/fail; LLM gives zero-maintenance coherence. Choose based on evaluation goal.
 - **LLM strategy reuses the pipeline's LLM**: No extra infrastructure — the mock calls the same LLM endpoint the evaluation pipeline already provisions.
 - **Generic server, config-driven**: One image, any MCP. The schema defines the tools; the fixtures define the responses.
